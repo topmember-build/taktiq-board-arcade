@@ -14,7 +14,266 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      anticheat_events: {
+        Row: {
+          created_at: string
+          details: Json | null
+          event_type: string
+          id: string
+          match_id: string | null
+          profile_id: string | null
+          resolved: boolean
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          event_type: string
+          id?: string
+          match_id?: string | null
+          profile_id?: string | null
+          resolved?: boolean
+          severity: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          event_type?: string
+          id?: string
+          match_id?: string | null
+          profile_id?: string | null
+          resolved?: boolean
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anticheat_events_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anticheat_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          chain_id: number
+          created_at: string
+          ended_at: string | null
+          game: string
+          id: string
+          player_a: string | null
+          player_b: string | null
+          stake_amount: number
+          status: string
+          token_symbol: string
+          winner: string | null
+        }
+        Insert: {
+          chain_id: number
+          created_at?: string
+          ended_at?: string | null
+          game: string
+          id?: string
+          player_a?: string | null
+          player_b?: string | null
+          stake_amount: number
+          status?: string
+          token_symbol: string
+          winner?: string | null
+        }
+        Update: {
+          chain_id?: number
+          created_at?: string
+          ended_at?: string | null
+          game?: string
+          id?: string
+          player_a?: string | null
+          player_b?: string | null
+          stake_amount?: number
+          status?: string
+          token_symbol?: string
+          winner?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_player_a_fkey"
+            columns: ["player_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player_b_fkey"
+            columns: ["player_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_fkey"
+            columns: ["winner"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          google_email: string | null
+          google_user_id: string | null
+          id: string
+          referral_code: string
+          referred_by: string | null
+          total_wagered: number
+          total_won: number
+          trust_score: number
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          google_email?: string | null
+          google_user_id?: string | null
+          id?: string
+          referral_code?: string
+          referred_by?: string | null
+          total_wagered?: number
+          total_won?: number
+          trust_score?: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          google_email?: string | null
+          google_user_id?: string | null
+          id?: string
+          referral_code?: string
+          referred_by?: string | null
+          total_wagered?: number
+          total_won?: number
+          trust_score?: number
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_earnings: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          referee_id: string
+          referrer_id: string
+          source: string
+          token_symbol: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          referee_id: string
+          referrer_id: string
+          source: string
+          token_symbol: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          referee_id?: string
+          referrer_id?: string
+          source?: string
+          token_symbol?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_earnings_referee_id_fkey"
+            columns: ["referee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_earnings_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          chain_id: number
+          created_at: string
+          id: string
+          profile_id: string
+          status: string
+          token_symbol: string
+          tx_hash: string | null
+          tx_type: string
+          wallet_address: string
+        }
+        Insert: {
+          amount: number
+          chain_id: number
+          created_at?: string
+          id?: string
+          profile_id: string
+          status?: string
+          token_symbol: string
+          tx_hash?: string | null
+          tx_type: string
+          wallet_address: string
+        }
+        Update: {
+          amount?: number
+          chain_id?: number
+          created_at?: string
+          id?: string
+          profile_id?: string
+          status?: string
+          token_symbol?: string
+          tx_hash?: string | null
+          tx_type?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

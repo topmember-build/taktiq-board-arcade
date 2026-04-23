@@ -9,38 +9,175 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as ReferralsRouteImport } from './routes/referrals'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as LobbyRouteImport } from './routes/lobby'
+import { Route as ChartsRouteImport } from './routes/charts'
+import { Route as AntiCheatRouteImport } from './routes/anti-cheat'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferralsRoute = ReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LobbyRoute = LobbyRouteImport.update({
+  id: '/lobby',
+  path: '/lobby',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChartsRoute = ChartsRouteImport.update({
+  id: '/charts',
+  path: '/charts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AntiCheatRoute = AntiCheatRouteImport.update({
+  id: '/anti-cheat',
+  path: '/anti-cheat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesSlugRoute = GamesSlugRouteImport.update({
+  id: '/games/$slug',
+  path: '/games/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/anti-cheat': typeof AntiCheatRoute
+  '/charts': typeof ChartsRoute
+  '/lobby': typeof LobbyRoute
+  '/profile': typeof ProfileRoute
+  '/referrals': typeof ReferralsRoute
+  '/wallet': typeof WalletRoute
+  '/games/$slug': typeof GamesSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/anti-cheat': typeof AntiCheatRoute
+  '/charts': typeof ChartsRoute
+  '/lobby': typeof LobbyRoute
+  '/profile': typeof ProfileRoute
+  '/referrals': typeof ReferralsRoute
+  '/wallet': typeof WalletRoute
+  '/games/$slug': typeof GamesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/anti-cheat': typeof AntiCheatRoute
+  '/charts': typeof ChartsRoute
+  '/lobby': typeof LobbyRoute
+  '/profile': typeof ProfileRoute
+  '/referrals': typeof ReferralsRoute
+  '/wallet': typeof WalletRoute
+  '/games/$slug': typeof GamesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/anti-cheat'
+    | '/charts'
+    | '/lobby'
+    | '/profile'
+    | '/referrals'
+    | '/wallet'
+    | '/games/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/anti-cheat'
+    | '/charts'
+    | '/lobby'
+    | '/profile'
+    | '/referrals'
+    | '/wallet'
+    | '/games/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/anti-cheat'
+    | '/charts'
+    | '/lobby'
+    | '/profile'
+    | '/referrals'
+    | '/wallet'
+    | '/games/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AntiCheatRoute: typeof AntiCheatRoute
+  ChartsRoute: typeof ChartsRoute
+  LobbyRoute: typeof LobbyRoute
+  ProfileRoute: typeof ProfileRoute
+  ReferralsRoute: typeof ReferralsRoute
+  WalletRoute: typeof WalletRoute
+  GamesSlugRoute: typeof GamesSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/referrals': {
+      id: '/referrals'
+      path: '/referrals'
+      fullPath: '/referrals'
+      preLoaderRoute: typeof ReferralsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lobby': {
+      id: '/lobby'
+      path: '/lobby'
+      fullPath: '/lobby'
+      preLoaderRoute: typeof LobbyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/charts': {
+      id: '/charts'
+      path: '/charts'
+      fullPath: '/charts'
+      preLoaderRoute: typeof ChartsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anti-cheat': {
+      id: '/anti-cheat'
+      path: '/anti-cheat'
+      fullPath: '/anti-cheat'
+      preLoaderRoute: typeof AntiCheatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +185,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/$slug': {
+      id: '/games/$slug'
+      path: '/games/$slug'
+      fullPath: '/games/$slug'
+      preLoaderRoute: typeof GamesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AntiCheatRoute: AntiCheatRoute,
+  ChartsRoute: ChartsRoute,
+  LobbyRoute: LobbyRoute,
+  ProfileRoute: ProfileRoute,
+  ReferralsRoute: ReferralsRoute,
+  WalletRoute: WalletRoute,
+  GamesSlugRoute: GamesSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

@@ -16,6 +16,7 @@ import { Route as LobbyRouteImport } from './routes/lobby'
 import { Route as ChartsRouteImport } from './routes/charts'
 import { Route as AntiCheatRouteImport } from './routes/anti-cheat'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MatchIdRouteImport } from './routes/match.$id'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 
 const WalletRoute = WalletRouteImport.update({
@@ -53,6 +54,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatchIdRoute = MatchIdRouteImport.update({
+  id: '/match/$id',
+  path: '/match/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GamesSlugRoute = GamesSlugRouteImport.update({
   id: '/games/$slug',
   path: '/games/$slug',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/referrals': typeof ReferralsRoute
   '/wallet': typeof WalletRoute
   '/games/$slug': typeof GamesSlugRoute
+  '/match/$id': typeof MatchIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/referrals': typeof ReferralsRoute
   '/wallet': typeof WalletRoute
   '/games/$slug': typeof GamesSlugRoute
+  '/match/$id': typeof MatchIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/referrals': typeof ReferralsRoute
   '/wallet': typeof WalletRoute
   '/games/$slug': typeof GamesSlugRoute
+  '/match/$id': typeof MatchIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/wallet'
     | '/games/$slug'
+    | '/match/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/wallet'
     | '/games/$slug'
+    | '/match/$id'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/wallet'
     | '/games/$slug'
+    | '/match/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   ReferralsRoute: typeof ReferralsRoute
   WalletRoute: typeof WalletRoute
   GamesSlugRoute: typeof GamesSlugRoute
+  MatchIdRoute: typeof MatchIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/match/$id': {
+      id: '/match/$id'
+      path: '/match/$id'
+      fullPath: '/match/$id'
+      preLoaderRoute: typeof MatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/games/$slug': {
       id: '/games/$slug'
       path: '/games/$slug'
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReferralsRoute: ReferralsRoute,
   WalletRoute: WalletRoute,
   GamesSlugRoute: GamesSlugRoute,
+  MatchIdRoute: MatchIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

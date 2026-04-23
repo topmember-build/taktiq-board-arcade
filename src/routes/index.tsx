@@ -49,6 +49,20 @@ const GAMES = [
     pool: "8,310 MON",
     players: "844 online",
   },
+  {
+    slug: "monopoly",
+    name: "Monopoly",
+    tagline: "Hasbro 1935 ruleset",
+    pool: "3,420 MON",
+    players: "612 online",
+  },
+  {
+    slug: "scrabble",
+    name: "Scrabble",
+    tagline: "TWL / SOWPODS dictionaries",
+    pool: "1,910 MON",
+    players: "388 online",
+  },
 ];
 
 function HomePage() {

@@ -15,6 +15,7 @@ import {
 import logo from "@/assets/taqtik-logo.jpg";
 import { AmbientPlayer } from "./AmbientPlayer";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -124,11 +125,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-10">{children}</main>
 
       <footer className="border-t border-border/60 mt-12 py-8 text-center text-xs text-muted-foreground">
-        <p>
+        <p suppressHydrationWarning>
           © {new Date().getFullYear()} TaQtik · Testnet only · Play responsibly · Compliant with
-          regulated board game rule sets (FIDE, WCDF, WBF).
+          regulated board game rule sets (FIDE, WCDF, WBF, Hasbro, Mattel).
         </p>
       </footer>
+
+      <Toaster richColors position="top-center" />
     </div>
   );
 }

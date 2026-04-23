@@ -62,44 +62,144 @@ export type Database = {
           },
         ]
       }
+      match_messages: {
+        Row: {
+          body: string
+          created_at: string
+          display_name: string | null
+          id: string
+          match_id: string
+          wallet_address: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          match_id: string
+          wallet_address: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          match_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_moves: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          move: Json
+          ply: number
+          result: string | null
+          state: Json | null
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          move: Json
+          ply: number
+          result?: string | null
+          state?: Json | null
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          move?: Json
+          ply?: number
+          result?: string | null
+          state?: Json | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_moves_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           chain_id: number
           created_at: string
+          current_state: Json | null
           ended_at: string | null
+          escrow_address: string | null
+          escrow_tx_hash: string | null
           game: string
+          host_wallet: string | null
           id: string
+          joiner_wallet: string | null
           player_a: string | null
           player_b: string | null
           stake_amount: number
           status: string
+          time_control: string | null
           token_symbol: string
+          turn_wallet: string | null
+          updated_at: string
           winner: string | null
         }
         Insert: {
           chain_id: number
           created_at?: string
+          current_state?: Json | null
           ended_at?: string | null
+          escrow_address?: string | null
+          escrow_tx_hash?: string | null
           game: string
+          host_wallet?: string | null
           id?: string
+          joiner_wallet?: string | null
           player_a?: string | null
           player_b?: string | null
           stake_amount: number
           status?: string
+          time_control?: string | null
           token_symbol: string
+          turn_wallet?: string | null
+          updated_at?: string
           winner?: string | null
         }
         Update: {
           chain_id?: number
           created_at?: string
+          current_state?: Json | null
           ended_at?: string | null
+          escrow_address?: string | null
+          escrow_tx_hash?: string | null
           game?: string
+          host_wallet?: string | null
           id?: string
+          joiner_wallet?: string | null
           player_a?: string | null
           player_b?: string | null
           stake_amount?: number
           status?: string
+          time_control?: string | null
           token_symbol?: string
+          turn_wallet?: string | null
+          updated_at?: string
           winner?: string | null
         }
         Relationships: [

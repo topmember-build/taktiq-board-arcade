@@ -1,31 +1,53 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Construction, ArrowLeft, Trophy, Users, Coins } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useAccount } from "wagmi";
+import { ArrowLeft, Trophy, Sparkles, Plus, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/games/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${params.slug.charAt(0).toUpperCase() + params.slug.slice(1)} — TaQtik` },
+      { title: `${capitalize(params.slug)} — TaQtik` },
       { name: "description", content: `Play ${params.slug} for crypto on TaQtik.` },
     ],
   }),
   component: GamePage,
 });
 
-const META: Record<string, { name: string; rules: string; tagline: string }> = {
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const META: Record<string, { name: string; rules: string; tagline: string; ready: boolean }> = {
   chess: {
     name: "Chess",
     rules: "FIDE Laws of Chess",
     tagline: "Outsmart your opponent on the 64-square battlefield.",
+    ready: true,
   },
   checkers: {
     name: "Checkers",
     rules: "WCDF tournament rules",
     tagline: "Quick, sharp, decisive — capture every piece to win.",
+    ready: true,
   },
   backgammon: {
     name: "Backgammon",
     rules: "WBF rules with doubling cube",
     tagline: "Roll, race, and double the stakes.",
+    ready: true,
+  },
+  monopoly: {
+    name: "Monopoly",
+    rules: "Hasbro standard 1935 ruleset",
+    tagline: "Buy, build, bankrupt — the classic property battle.",
+    ready: false,
+  },
+  scrabble: {
+    name: "Scrabble",
+    rules: "TWL/SOWPODS official dictionaries",
+    tagline: "Score the highest with letter tiles on a 15×15 board.",
+    ready: false,
   },
 };
 
@@ -35,6 +57,40 @@ function GamePage() {
     name: slug,
     rules: "Standard rules",
     tagline: "Coming soon.",
+    ready: false,
+  };
+  const { address, isConnected } = useAccount();
+  const navigate = useNavigate();
+  const [creating, setCreating] = useState(false);
+  const [stake, setStake] = useState("1");
+  const [chainId, setChainId] = useState(SUPPORTED_CHAINS[0].id);
+
+  const host = async () => {
+    if (!address) {
+      toast.error("Connect your wallet first");
+      return;
+    }
+    setCreating(true);
+    const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
+    const { data, error } = await supabase
+      .from("matches")
+      .insert({
+        game: slug,
+        chain_id: chainId,
+        stake_amount: parseFloat(stake) || 1,
+        token_symbol: chain.symbol,
+        status: "open",
+        host_wallet: address,
+        time_control: "5+0",
+      })
+      .select("id")
+      .single();
+    setCreating(false);
+    if (error || !data) {
+      toast.error("Could not create match");
+      return;
+    }
+    navigate({ to: "/match/$id", params: { id: data.id } });
   };
 
   return (
@@ -48,53 +104,85 @@ function GamePage() {
 
       <div>
         <div className="text-xs uppercase tracking-widest text-gold">{meta.rules}</div>
-        <h1 className="mt-1 text-4xl sm:text-5xl font-bold">{meta.name}</h1>
+        <h1 className="mt-1 text-4xl sm:text-5xl font-bold capitalize">{meta.name}</h1>
         <p className="text-muted-foreground mt-2">{meta.tagline}</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 aspect-square sm:aspect-video rounded-2xl border border-border/60 bg-gradient-card shadow-elegant grid place-items-center">
-          <div className="text-center px-6">
-            <Construction className="h-12 w-12 mx-auto text-gold mb-4" />
-            <h2 className="text-xl font-semibold">Game engine integration in progress</h2>
-            <p className="text-sm text-muted-foreground mt-2 max-w-md">
-              The on-chain match contract is wired up. The visual {meta.name} board is being added
-              in the next build — your wallet, deposit, and matchmaking flows are already live.
-            </p>
+        <div className="lg:col-span-2 rounded-2xl border border-border/60 bg-gradient-card p-6 sm:p-8 shadow-elegant space-y-4">
+          <div className="flex items-center gap-2 text-sm">
+            {meta.ready ? (
+              <span className="inline-flex items-center gap-1 text-success">
+                <Sparkles className="h-3 w-3" /> Engine ready — host or join a match
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                <Sparkles className="h-3 w-3" /> Engine in development — chat + escrow live
+              </span>
+            )}
           </div>
+          <h2 className="text-xl font-semibold">How {meta.name} works on TaQtik</h2>
+          <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-5">
+            <li>Host a match with your stake. The opponent matches your stake to start.</li>
+            <li>Both stakes are locked by the TaQtik escrow contract on Monad testnet.</li>
+            <li>Every move is logged to a public, append-only history for fair-play review.</li>
+            <li>Winner is paid 2× stake minus 2.5% rake automatically.</li>
+          </ul>
         </div>
 
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-gold/30 bg-gradient-card p-5 shadow-gold">
+        <div className="rounded-2xl border border-gold/30 bg-gradient-card p-5 shadow-gold space-y-4">
+          <div>
             <div className="text-xs uppercase tracking-widest text-muted-foreground">
-              Current pot
+              Quick host
             </div>
-            <div className="mt-2 text-3xl font-bold text-gradient-gold">10 MON</div>
-            <div className="mt-1 text-xs text-muted-foreground">Winner takes 19.5 MON (2.5% rake)</div>
-            <button className="mt-5 w-full px-4 py-3 rounded-lg bg-gradient-gold text-primary-foreground font-semibold shadow-gold">
-              Match stake — 5 MON
-            </button>
+            <h3 className="text-lg font-bold mt-1">Start a {meta.name} match</h3>
           </div>
-
-          <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Users className="h-4 w-4" /> Spectators
-              </span>
-              <span className="font-semibold">24</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Trophy className="h-4 w-4" /> Host record
-              </span>
-              <span className="font-semibold">12W · 4L</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Coins className="h-4 w-4" /> Network
-              </span>
-              <span className="font-semibold">Monad Testnet</span>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
+            {SUPPORTED_CHAINS.slice(0, 4).map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setChainId(c.id)}
+                className={`px-3 py-2 rounded-lg border text-xs font-medium ${
+                  chainId === c.id
+                    ? "border-gold bg-gold/10 text-gold"
+                    : "border-border text-muted-foreground hover:border-gold/40"
+                }`}
+              >
+                <span
+                  className="inline-block h-2 w-2 rounded-full mr-1"
+                  style={{ backgroundColor: c.color }}
+                />
+                {c.symbol}
+              </button>
+            ))}
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-widest text-muted-foreground">
+              Stake
+            </label>
+            <input
+              type="number"
+              value={stake}
+              onChange={(e) => setStake(e.target.value)}
+              className="mt-2 w-full px-3 py-2 rounded-lg bg-input border border-border focus:outline-none focus:border-gold/60"
+            />
+          </div>
+          <button
+            onClick={host}
+            disabled={!isConnected || creating}
+            className="w-full px-4 py-3 rounded-lg bg-gradient-gold text-primary-foreground font-semibold shadow-gold inline-flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            {creating ? "Creating…" : "Host match"}
+          </button>
+          <Link
+            to="/lobby"
+            className="block text-center w-full px-4 py-2 rounded-lg border border-silver/40 text-silver hover:bg-silver/10 text-sm"
+          >
+            Browse open {meta.name} matches
+          </Link>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground border-t border-border/60 pt-3">
+            <Trophy className="h-3.5 w-3.5 text-gold" /> Winner-takes-pot · 2.5% rake
           </div>
         </div>
       </div>

@@ -552,6 +552,49 @@ function MatchRoomPage() {
               </a>
             )}
 
+            {/* Escrow verifier — polls on-chain + DB to confirm locked funds */}
+            {escrowReady && match.escrow_tx_hash && (
+              <div className="mt-4 rounded-lg border border-border/60 bg-background/40 p-3 text-[11px] space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3 text-gold" /> Escrow verifier
+                  </span>
+                  <button
+                    onClick={escrow.refresh}
+                    className="text-muted-foreground hover:text-gold inline-flex items-center gap-1"
+                    aria-label="Refresh on-chain escrow status"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Host stake</span>
+                  <span className="inline-flex items-center gap-1">
+                    {escrow.hostLocked ? (
+                      <CheckCircle2 className="h-3 w-3 text-success" />
+                    ) : (
+                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    )}
+                    {escrow.hostLocked ? "Locked" : "Pending…"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Joiner stake</span>
+                  <span className="inline-flex items-center gap-1">
+                    {escrow.joinerLocked ? (
+                      <CheckCircle2 className="h-3 w-3 text-success" />
+                    ) : (
+                      <Loader2 className="h-3 w-3 text-muted-foreground/50" />
+                    )}
+                    {escrow.joinerLocked ? "Locked" : "Awaiting"}
+                  </span>
+                </div>
+                {escrow.error && (
+                  <div className="text-destructive">⚠ {escrow.error}</div>
+                )}
+              </div>
+            )}
+
             {!isEscrowDeployed() && isMonad && (
               <p className="mt-3 text-[11px] text-muted-foreground">
                 <ShieldCheck className="h-3 w-3 inline mr-1" />

@@ -1,8 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther } from "viem";
-import { ArrowLeft, Coins, Trophy, Users, Loader2, ShieldCheck, Lock, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  Coins,
+  Trophy,
+  Users,
+  Loader2,
+  ShieldCheck,
+  Lock,
+  Clock,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { ESCROW_ABI, ESCROW_ADDRESS, isEscrowDeployed, matchIdToBytes32 } from "@/lib/escrow";
@@ -18,6 +30,8 @@ import { initialMonopoly } from "@/lib/games/monopoly";
 import { initialScrabble } from "@/lib/games/scrabble";
 import { Chess } from "chess.js";
 import { toast } from "sonner";
+import { useMatchSync } from "@/hooks/useMatchSync";
+import { useEscrowVerifier } from "@/hooks/useEscrowVerifier";
 
 export const Route = createFileRoute("/match/$id")({
   head: ({ params }) => ({

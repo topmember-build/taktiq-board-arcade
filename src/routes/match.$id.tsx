@@ -459,6 +459,31 @@ function MatchRoomPage() {
           <div className="rounded-2xl border border-border/60 bg-gradient-card p-4 sm:p-6 shadow-elegant">
             {renderBoard()}
           </div>
+
+          {/* Pending move retry banner */}
+          {pendingMove && pendingMove.error && (
+            <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-3 flex items-center gap-3 text-sm">
+              <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-destructive">Move not saved</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  Attempt {pendingMove.attempts} — {pendingMove.error}
+                </div>
+              </div>
+              <button
+                onClick={() => flushMove(pendingMove)}
+                disabled={submitting}
+                className="px-3 py-1.5 rounded-md bg-destructive/15 text-destructive hover:bg-destructive/25 inline-flex items-center gap-1 text-xs disabled:opacity-50"
+              >
+                {submitting ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3 w-3" />
+                )}
+                Retry
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">

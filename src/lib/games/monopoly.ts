@@ -156,7 +156,8 @@ export function decideBuy(state: MonopolyState, player: PlayerColor, buy: boolea
   }
   if (!state.awaitingDecision) return state;
   const next: MonopolyState = JSON.parse(JSON.stringify(state));
-  const { tile, price } = next.awaitingDecision;
+  const decision = next.awaitingDecision!;
+  const { tile, price } = decision;
   if (buy && next.cash[player] >= price) {
     next.cash[player] -= price;
     next.owners[tile] = player;

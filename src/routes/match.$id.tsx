@@ -62,15 +62,38 @@ type MatchRow = {
   updated_at: string;
 };
 
+type PendingMove = {
+  id: string;
+  move: unknown;
+  nextState: unknown;
+  result: string | null;
+  attempts: number;
+  error: string | null;
+};
+
 function MatchRoomPage() {
   const { id } = Route.useParams();
   const { address } = useAccount();
   const navigate = useNavigate();
-  const [match, setMatch] = useState<MatchRow | null>(null);
-  const [loading, setLoading] = useState(true);
   const [staking, setStaking] = useState(false);
   const [pendingTx, setPendingTx] = useState<`0x${string}` | undefined>();
   const [now, setNow] = useState(Date.now());
+  const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Realtime + polling fallback for match state
+  const { data: match, loading } = useMatchSync<MatchRow>(id);
+
+  // Navigate away if match is deleted
+  useEffect(() => {
+    if (!loading && !match) {
+      // give realtime a moment before redirecting
+      const t = setTimeout(() => {
+        if (!match) navigate({ to: "/lobby" });
+      }, 1500);
+      return () => clearTimeout(t);
+    }
+  }, [loading, match, navigate]);
 
   const { writeContractAsync } = useWriteContract();
   const { data: txReceipt, isLoading: waitingTx } = useWaitForTransactionReceipt({
@@ -82,42 +105,6 @@ function MatchRoomPage() {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-
-  // Load + subscribe
-  useEffect(() => {
-    let mounted = true;
-    supabase
-      .from("matches")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (mounted) {
-          setMatch(data as MatchRow | null);
-          setLoading(false);
-        }
-      });
-
-    const channel = supabase
-      .channel(`match-${id}-state`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "matches", filter: `id=eq.${id}` },
-        (payload) => {
-          if (payload.eventType === "DELETE") {
-            navigate({ to: "/lobby" });
-          } else {
-            setMatch(payload.new as MatchRow);
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
-  }, [id, navigate]);
 
   // When the host's createMatch tx confirms, persist the hash + escrow address
   useEffect(() => {
@@ -137,14 +124,21 @@ function MatchRoomPage() {
   const isJoiner =
     !!match?.joiner_wallet && address?.toLowerCase() === match.joiner_wallet.toLowerCase();
   const isPlayer = isHost || isJoiner;
-  const opponent = isHost ? match?.joiner_wallet : match?.host_wallet;
-  void opponent;
 
   const chain = SUPPORTED_CHAINS.find((c) => c.id === match?.chain_id);
   const isMonad = match?.chain_id === 10143;
   const escrowReady = isMonad && isEscrowDeployed();
-  // Host has locked their stake (or escrow is not on Monad — demo mode permits play)
-  const hostLocked = !!match?.escrow_tx_hash || !escrowReady;
+
+  // Verifier: polls on-chain + reconciles with DB to confirm locked funds
+  const escrow = useEscrowVerifier({
+    matchId: match?.id ?? null,
+    chainId: match?.chain_id,
+    hostWallet: match?.host_wallet ?? null,
+    joinerWallet: match?.joiner_wallet ?? null,
+    escrowTxHash: match?.escrow_tx_hash ?? null,
+    stakeAmount: match?.stake_amount ?? 0,
+  });
+  const hostLocked = escrow.hostLocked;
 
   // Determine my color/turn per game
   const myColor = useMemo(() => {

@@ -28,16 +28,16 @@ export function useMatchSync<T extends { id: string; updated_at?: string }>(
         .maybeSingle();
       if (!mounted) return;
       if (row) {
-        // Only update if newer than what we have (avoids clobbering optimistic state)
+        const next = row as unknown as T;
         const existing = dataRef.current;
         if (
           !existing ||
           !existing.updated_at ||
-          new Date((row as T).updated_at ?? 0).getTime() >=
+          new Date(next.updated_at ?? 0).getTime() >=
             new Date(existing.updated_at).getTime()
         ) {
-          dataRef.current = row as T;
-          setData(row as T);
+          dataRef.current = next;
+          setData(next);
         }
       }
       setLoading(false);
@@ -54,7 +54,7 @@ export function useMatchSync<T extends { id: string; updated_at?: string }>(
           if (!mounted) return;
           setLastEventAt(Date.now());
           if (payload.eventType !== "DELETE") {
-            const next = payload.new as T;
+            const next = payload.new as unknown as T;
             dataRef.current = next;
             setData(next);
           } else {

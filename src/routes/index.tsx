@@ -59,13 +59,16 @@ function HomePage() {
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <ConnectButton.Custom>
-                {({ account, openConnectModal, openAccountModal }) => (
+                {({ account, openConnectModal, openAccountModal, mounted }) => (
                   <button
                     onClick={account ? openAccountModal : openConnectModal}
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-gold text-primary-foreground font-semibold shadow-gold hover:opacity-90 transition-smooth"
+                    suppressHydrationWarning
                   >
                     <Wallet className="h-4 w-4" />
-                    {account ? "Wallet connected" : "Connect wallet to play"}
+                    <span suppressHydrationWarning>
+                      {mounted && account ? "Wallet connected" : "Connect wallet to play"}
+                    </span>
                   </button>
                 )}
               </ConnectButton.Custom>

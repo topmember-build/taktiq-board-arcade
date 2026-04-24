@@ -18,8 +18,11 @@ function ProfilePage() {
   const { address, isConnected } = useAccount();
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [stats, setStats] = useState({ matches: 0, won: 0, trust: 100 });
 
   useEffect(() => {
+    setMounted(true);
     supabase.auth.getSession().then(({ data }) => {
       setGoogleEmail(data.session?.user.email ?? null);
     });
@@ -28,6 +31,41 @@ function ProfilePage() {
     );
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Real stats from DB once wallet is known
+  useEffect(() => {
+    if (!address) return;
+    let cancelled = false;
+    const load = async () => {
+      const lower = address.toLowerCase();
+      const [{ data: played }, { data: won }] = await Promise.all([
+        supabase
+          .from("matches")
+          .select("id, host_wallet, joiner_wallet")
+          .or(`host_wallet.ilike.${lower},joiner_wallet.ilike.${lower}`),
+        supabase.from("matches").select("id, winner").eq("status", "ended"),
+      ]);
+      if (cancelled) return;
+      const wonCount = (won ?? []).filter(
+        (m: any) => (m.winner ?? "").toLowerCase() === lower,
+      ).length;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("trust_score")
+        .ilike("wallet_address", lower)
+        .maybeSingle();
+      if (cancelled) return;
+      setStats({
+        matches: played?.length ?? 0,
+        won: wonCount,
+        trust: (profile?.trust_score as number) ?? 100,
+      });
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [address]);
 
   const bindGoogle = async () => {
     setLoading(true);
@@ -43,7 +81,8 @@ function ProfilePage() {
     setGoogleEmail(null);
   };
 
-  if (!isConnected) {
+  // Avoid SSR/CSR mismatch — wagmi `isConnected` is only known on the client
+  if (!mounted || !isConnected) {
     return (
       <div className="max-w-md mx-auto text-center py-20 space-y-4">
         <Wallet className="h-12 w-12 mx-auto text-gold" />
@@ -80,15 +119,15 @@ function ProfilePage() {
         <div className="mt-6 grid grid-cols-3 gap-3 text-center">
           <div>
             <div className="text-xs text-muted-foreground">Matches</div>
-            <div className="text-xl font-bold">0</div>
+            <div className="text-xl font-bold">{stats.matches}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Won</div>
-            <div className="text-xl font-bold text-success">0</div>
+            <div className="text-xl font-bold text-success">{stats.won}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Trust</div>
-            <div className="text-xl font-bold text-gold">100</div>
+            <div className="text-xl font-bold text-gold">{stats.trust}</div>
           </div>
         </div>
       </div>

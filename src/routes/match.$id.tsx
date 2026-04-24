@@ -1,8 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther } from "viem";
-import { ArrowLeft, Coins, Trophy, Users, Loader2, ShieldCheck, Lock, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  Coins,
+  Trophy,
+  Users,
+  Loader2,
+  ShieldCheck,
+  Lock,
+  Clock,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { ESCROW_ABI, ESCROW_ADDRESS, isEscrowDeployed, matchIdToBytes32 } from "@/lib/escrow";
@@ -18,6 +30,8 @@ import { initialMonopoly } from "@/lib/games/monopoly";
 import { initialScrabble } from "@/lib/games/scrabble";
 import { Chess } from "chess.js";
 import { toast } from "sonner";
+import { useMatchSync } from "@/hooks/useMatchSync";
+import { useEscrowVerifier } from "@/hooks/useEscrowVerifier";
 
 export const Route = createFileRoute("/match/$id")({
   head: ({ params }) => ({
@@ -48,15 +62,38 @@ type MatchRow = {
   updated_at: string;
 };
 
+type PendingMove = {
+  id: string;
+  move: unknown;
+  nextState: unknown;
+  result: string | null;
+  attempts: number;
+  error: string | null;
+};
+
 function MatchRoomPage() {
   const { id } = Route.useParams();
   const { address } = useAccount();
   const navigate = useNavigate();
-  const [match, setMatch] = useState<MatchRow | null>(null);
-  const [loading, setLoading] = useState(true);
   const [staking, setStaking] = useState(false);
   const [pendingTx, setPendingTx] = useState<`0x${string}` | undefined>();
   const [now, setNow] = useState(Date.now());
+  const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Realtime + polling fallback for match state
+  const { data: match, loading } = useMatchSync<MatchRow>(id);
+
+  // Navigate away if match is deleted
+  useEffect(() => {
+    if (!loading && !match) {
+      // give realtime a moment before redirecting
+      const t = setTimeout(() => {
+        if (!match) navigate({ to: "/lobby" });
+      }, 1500);
+      return () => clearTimeout(t);
+    }
+  }, [loading, match, navigate]);
 
   const { writeContractAsync } = useWriteContract();
   const { data: txReceipt, isLoading: waitingTx } = useWaitForTransactionReceipt({
@@ -68,42 +105,6 @@ function MatchRoomPage() {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-
-  // Load + subscribe
-  useEffect(() => {
-    let mounted = true;
-    supabase
-      .from("matches")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (mounted) {
-          setMatch(data as MatchRow | null);
-          setLoading(false);
-        }
-      });
-
-    const channel = supabase
-      .channel(`match-${id}-state`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "matches", filter: `id=eq.${id}` },
-        (payload) => {
-          if (payload.eventType === "DELETE") {
-            navigate({ to: "/lobby" });
-          } else {
-            setMatch(payload.new as MatchRow);
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
-  }, [id, navigate]);
 
   // When the host's createMatch tx confirms, persist the hash + escrow address
   useEffect(() => {
@@ -123,14 +124,21 @@ function MatchRoomPage() {
   const isJoiner =
     !!match?.joiner_wallet && address?.toLowerCase() === match.joiner_wallet.toLowerCase();
   const isPlayer = isHost || isJoiner;
-  const opponent = isHost ? match?.joiner_wallet : match?.host_wallet;
-  void opponent;
 
   const chain = SUPPORTED_CHAINS.find((c) => c.id === match?.chain_id);
   const isMonad = match?.chain_id === 10143;
   const escrowReady = isMonad && isEscrowDeployed();
-  // Host has locked their stake (or escrow is not on Monad — demo mode permits play)
-  const hostLocked = !!match?.escrow_tx_hash || !escrowReady;
+
+  // Verifier: polls on-chain + reconciles with DB to confirm locked funds
+  const escrow = useEscrowVerifier({
+    matchId: match?.id ?? null,
+    chainId: match?.chain_id,
+    hostWallet: match?.host_wallet ?? null,
+    joinerWallet: match?.joiner_wallet ?? null,
+    escrowTxHash: match?.escrow_tx_hash ?? null,
+    stakeAmount: match?.stake_amount ?? 0,
+  });
+  const hostLocked = escrow.hostLocked;
 
   // Determine my color/turn per game
   const myColor = useMemo(() => {
@@ -238,35 +246,76 @@ function MatchRoomPage() {
     }
   };
 
-  // Submit move — works for all engines
+  // Try to flush the pending move to Supabase. Returns true on success.
+  const flushMove = useCallback(
+    async (m: PendingMove) => {
+      if (!match || !address) return false;
+      setSubmitting(true);
+      try {
+        const nextTurn =
+          match.turn_wallet === match.host_wallet ? match.joiner_wallet : match.host_wallet;
+        const updates: Partial<MatchRow> = {
+          current_state: m.nextState as any,
+          turn_wallet: nextTurn,
+          updated_at: new Date().toISOString(),
+        };
+        if (m.result) {
+          updates.status = "ended";
+          updates.winner = address;
+        }
+        const { error } = await supabase
+          .from("matches")
+          .update(updates as any)
+          .eq("id", match.id);
+        if (error) throw error;
+        const { error: moveErr } = await supabase.from("match_moves").insert({
+          match_id: match.id,
+          ply: 0,
+          wallet_address: address,
+          move: m.move as any,
+          state: m.nextState as any,
+          result: m.result,
+        });
+        if (moveErr) throw moveErr;
+        if (m.result) toast.success(`Game over — ${m.result}`);
+        setPendingMove(null);
+        return true;
+      } catch (e: any) {
+        const msg = e?.message ?? "Network error";
+        setPendingMove({ ...m, attempts: m.attempts + 1, error: msg });
+        toast.error(`Move failed: ${msg} — tap retry`);
+        return false;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [match, address],
+  );
+
+  // Submit move — enqueues + tries once. UI exposes a retry button on failure.
   const submitMove = async (move: unknown, nextState: unknown, result: string | null) => {
     if (!match || !address) return;
-    const nextTurn =
-      match.turn_wallet === match.host_wallet ? match.joiner_wallet : match.host_wallet;
-    const updates: Partial<MatchRow> = {
-      current_state: nextState as any,
-      turn_wallet: nextTurn,
-      updated_at: new Date().toISOString(),
-    };
-    if (result) {
-      updates.status = "ended";
-      updates.winner = address;
-    }
-    const { error } = await supabase.from("matches").update(updates as any).eq("id", match.id);
-    if (error) {
-      toast.error("Failed to save move — try again");
-      return;
-    }
-    await supabase.from("match_moves").insert({
-      match_id: match.id,
-      ply: 0,
-      wallet_address: address,
-      move: move as any,
-      state: nextState as any,
+    const queued: PendingMove = {
+      id: `${Date.now()}`,
+      move,
+      nextState,
       result,
-    });
-    if (result) toast.success(`Game over — ${result}`);
+      attempts: 0,
+      error: null,
+    };
+    setPendingMove(queued);
+    await flushMove(queued);
   };
+
+  // Auto-retry once after 3s if a move is still pending due to network blip
+  useEffect(() => {
+    if (!pendingMove || pendingMove.attempts >= 3 || submitting) return;
+    const t = setTimeout(() => {
+      void flushMove(pendingMove);
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [pendingMove, submitting, flushMove]);
+
 
   if (loading) {
     return (
@@ -410,6 +459,31 @@ function MatchRoomPage() {
           <div className="rounded-2xl border border-border/60 bg-gradient-card p-4 sm:p-6 shadow-elegant">
             {renderBoard()}
           </div>
+
+          {/* Pending move retry banner */}
+          {pendingMove && pendingMove.error && (
+            <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-3 flex items-center gap-3 text-sm">
+              <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-destructive">Move not saved</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  Attempt {pendingMove.attempts} — {pendingMove.error}
+                </div>
+              </div>
+              <button
+                onClick={() => flushMove(pendingMove)}
+                disabled={submitting}
+                className="px-3 py-1.5 rounded-md bg-destructive/15 text-destructive hover:bg-destructive/25 inline-flex items-center gap-1 text-xs disabled:opacity-50"
+              >
+                {submitting ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3 w-3" />
+                )}
+                Retry
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -476,6 +550,49 @@ function MatchRoomPage() {
               >
                 View escrow tx
               </a>
+            )}
+
+            {/* Escrow verifier — polls on-chain + DB to confirm locked funds */}
+            {escrowReady && match.escrow_tx_hash && (
+              <div className="mt-4 rounded-lg border border-border/60 bg-background/40 p-3 text-[11px] space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3 text-gold" /> Escrow verifier
+                  </span>
+                  <button
+                    onClick={escrow.refresh}
+                    className="text-muted-foreground hover:text-gold inline-flex items-center gap-1"
+                    aria-label="Refresh on-chain escrow status"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Host stake</span>
+                  <span className="inline-flex items-center gap-1">
+                    {escrow.hostLocked ? (
+                      <CheckCircle2 className="h-3 w-3 text-success" />
+                    ) : (
+                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    )}
+                    {escrow.hostLocked ? "Locked" : "Pending…"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Joiner stake</span>
+                  <span className="inline-flex items-center gap-1">
+                    {escrow.joinerLocked ? (
+                      <CheckCircle2 className="h-3 w-3 text-success" />
+                    ) : (
+                      <Loader2 className="h-3 w-3 text-muted-foreground/50" />
+                    )}
+                    {escrow.joinerLocked ? "Locked" : "Awaiting"}
+                  </span>
+                </div>
+                {escrow.error && (
+                  <div className="text-destructive">⚠ {escrow.error}</div>
+                )}
+              </div>
             )}
 
             {!isEscrowDeployed() && isMonad && (

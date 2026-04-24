@@ -119,15 +119,15 @@ function ProfilePage() {
         <div className="mt-6 grid grid-cols-3 gap-3 text-center">
           <div>
             <div className="text-xs text-muted-foreground">Matches</div>
-            <div className="text-xl font-bold">0</div>
+            <div className="text-xl font-bold">{stats.matches}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Won</div>
-            <div className="text-xl font-bold text-success">0</div>
+            <div className="text-xl font-bold text-success">{stats.won}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Trust</div>
-            <div className="text-xl font-bold text-gold">100</div>
+            <div className="text-xl font-bold text-gold">{stats.trust}</div>
           </div>
         </div>
       </div>

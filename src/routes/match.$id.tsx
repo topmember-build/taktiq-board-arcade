@@ -246,35 +246,76 @@ function MatchRoomPage() {
     }
   };
 
-  // Submit move — works for all engines
+  // Try to flush the pending move to Supabase. Returns true on success.
+  const flushMove = useCallback(
+    async (m: PendingMove) => {
+      if (!match || !address) return false;
+      setSubmitting(true);
+      try {
+        const nextTurn =
+          match.turn_wallet === match.host_wallet ? match.joiner_wallet : match.host_wallet;
+        const updates: Partial<MatchRow> = {
+          current_state: m.nextState as any,
+          turn_wallet: nextTurn,
+          updated_at: new Date().toISOString(),
+        };
+        if (m.result) {
+          updates.status = "ended";
+          updates.winner = address;
+        }
+        const { error } = await supabase
+          .from("matches")
+          .update(updates as any)
+          .eq("id", match.id);
+        if (error) throw error;
+        const { error: moveErr } = await supabase.from("match_moves").insert({
+          match_id: match.id,
+          ply: 0,
+          wallet_address: address,
+          move: m.move as any,
+          state: m.nextState as any,
+          result: m.result,
+        });
+        if (moveErr) throw moveErr;
+        if (m.result) toast.success(`Game over — ${m.result}`);
+        setPendingMove(null);
+        return true;
+      } catch (e: any) {
+        const msg = e?.message ?? "Network error";
+        setPendingMove({ ...m, attempts: m.attempts + 1, error: msg });
+        toast.error(`Move failed: ${msg} — tap retry`);
+        return false;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [match, address],
+  );
+
+  // Submit move — enqueues + tries once. UI exposes a retry button on failure.
   const submitMove = async (move: unknown, nextState: unknown, result: string | null) => {
     if (!match || !address) return;
-    const nextTurn =
-      match.turn_wallet === match.host_wallet ? match.joiner_wallet : match.host_wallet;
-    const updates: Partial<MatchRow> = {
-      current_state: nextState as any,
-      turn_wallet: nextTurn,
-      updated_at: new Date().toISOString(),
-    };
-    if (result) {
-      updates.status = "ended";
-      updates.winner = address;
-    }
-    const { error } = await supabase.from("matches").update(updates as any).eq("id", match.id);
-    if (error) {
-      toast.error("Failed to save move — try again");
-      return;
-    }
-    await supabase.from("match_moves").insert({
-      match_id: match.id,
-      ply: 0,
-      wallet_address: address,
-      move: move as any,
-      state: nextState as any,
+    const queued: PendingMove = {
+      id: `${Date.now()}`,
+      move,
+      nextState,
       result,
-    });
-    if (result) toast.success(`Game over — ${result}`);
+      attempts: 0,
+      error: null,
+    };
+    setPendingMove(queued);
+    await flushMove(queued);
   };
+
+  // Auto-retry once after 3s if a move is still pending due to network blip
+  useEffect(() => {
+    if (!pendingMove || pendingMove.attempts >= 3 || submitting) return;
+    const t = setTimeout(() => {
+      void flushMove(pendingMove);
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [pendingMove, submitting, flushMove]);
+
 
   if (loading) {
     return (

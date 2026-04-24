@@ -6,6 +6,7 @@ export type DappStats = {
   endedMatches: number;
   totalPool: number;
   uniquePlayers: number;
+  totalMessages: number;
   loading: boolean;
 };
 
@@ -15,15 +16,19 @@ export function useDappStats(): DappStats {
     endedMatches: 0,
     totalPool: 0,
     uniquePlayers: 0,
+    totalMessages: 0,
     loading: true,
   });
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const { data: matches } = await supabase
-        .from("matches")
-        .select("status, stake_amount, host_wallet, joiner_wallet, joiner_wallet");
+      const [{ data: matches }, { count: msgCount }] = await Promise.all([
+        supabase
+          .from("matches")
+          .select("status, stake_amount, host_wallet, joiner_wallet, escrow_tx_hash"),
+        supabase.from("match_messages").select("*", { count: "exact", head: true }),
+      ]);
       if (!mounted) return;
       if (!matches) {
         setStats((s) => ({ ...s, loading: false }));
@@ -38,10 +43,14 @@ export function useDappStats(): DappStats {
         stake_amount: number;
         host_wallet: string | null;
         joiner_wallet: string | null;
+        escrow_tx_hash: string | null;
       }>) {
+        // Only count pool when funds are actually locked (escrow_tx_hash present)
         if (m.status === "open" || m.status === "live") {
           active += 1;
-          pool += Number(m.stake_amount) * (m.joiner_wallet ? 2 : 1);
+          if (m.escrow_tx_hash) {
+            pool += Number(m.stake_amount) * (m.joiner_wallet ? 2 : 1);
+          }
         }
         if (m.status === "ended") ended += 1;
         if (m.host_wallet) wallets.add(m.host_wallet.toLowerCase());
@@ -52,6 +61,7 @@ export function useDappStats(): DappStats {
         endedMatches: ended,
         totalPool: pool,
         uniquePlayers: wallets.size,
+        totalMessages: msgCount ?? 0,
         loading: false,
       });
     };
@@ -59,9 +69,15 @@ export function useDappStats(): DappStats {
     const channel = supabase
       .channel("dapp-stats")
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, () => load())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "match_messages" }, () =>
+        load(),
+      )
       .subscribe();
+    // Polling fallback in case realtime is delayed
+    const poll = setInterval(load, 30_000);
     return () => {
       mounted = false;
+      clearInterval(poll);
       supabase.removeChannel(channel);
     };
   }, []);

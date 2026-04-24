@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import logo from "@/assets/taqtik-logo.jpg";
 import { StatCard } from "@/components/StatCard";
+import { useDappStats } from "@/hooks/useDappStats";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,44 +29,15 @@ export const Route = createFileRoute("/")({
 });
 
 const GAMES = [
-  {
-    slug: "chess",
-    name: "Chess",
-    tagline: "FIDE-rated rule set",
-    pool: "12,480 MON",
-    players: "2,140 online",
-  },
-  {
-    slug: "checkers",
-    name: "Checkers",
-    tagline: "WCDF tournament rules",
-    pool: "5,920 MON",
-    players: "1,030 online",
-  },
-  {
-    slug: "backgammon",
-    name: "Backgammon",
-    tagline: "WBF doubling cube",
-    pool: "8,310 MON",
-    players: "844 online",
-  },
-  {
-    slug: "monopoly",
-    name: "Monopoly",
-    tagline: "Hasbro 1935 ruleset",
-    pool: "3,420 MON",
-    players: "612 online",
-  },
-  {
-    slug: "scrabble",
-    name: "Scrabble",
-    tagline: "TWL / SOWPODS dictionaries",
-    pool: "1,910 MON",
-    players: "388 online",
-  },
+  { slug: "chess", name: "Chess", tagline: "FIDE-rated rule set" },
+  { slug: "checkers", name: "Checkers", tagline: "WCDF tournament rules" },
+  { slug: "backgammon", name: "Backgammon", tagline: "WBF doubling cube" },
+  { slug: "monopoly", name: "Monopoly", tagline: "Hasbro 1935 ruleset" },
+  { slug: "scrabble", name: "Scrabble", tagline: "TWL / SOWPODS dictionaries" },
 ];
 
 function HomePage() {
+  const stats = useDappStats();
   return (
     <div className="space-y-16">
       {/* Hero */}
@@ -74,7 +46,7 @@ function HomePage() {
         <div className="relative grid lg:grid-cols-2 gap-8 p-8 sm:p-12 lg:p-16 items-center">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-xs text-gold">
-              <Sparkles className="h-3 w-3" /> Open beta · Monad Testnet live
+              <Sparkles className="h-3 w-3" /> Open beta · On Testnet live
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">
               The crypto arcade for{" "}
@@ -124,18 +96,35 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Stats — real numbers from DB */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Swords} label="Active matches" value="312" hint="Across 3 games" />
+        <StatCard
+          icon={Swords}
+          label="Active matches"
+          value={stats.loading ? "—" : String(stats.activeMatches)}
+          hint={stats.loading ? "Loading…" : "Open + live rooms"}
+        />
         <StatCard
           icon={Trophy}
-          label="Total prize pool"
-          value="26,710 MON"
-          hint="Live testnet stakes"
+          label="Active prize pool"
+          value={stats.loading ? "—" : `${stats.totalPool.toFixed(2)}`}
+          hint="Sum of staked tokens"
           accent="success"
         />
-        <StatCard icon={Users} label="Players online" value="4,014" accent="silver" />
-        <StatCard icon={ShieldCheck} label="Fair play score" value="99.7%" accent="success" />
+        <StatCard
+          icon={Users}
+          label="Unique players"
+          value={stats.loading ? "—" : String(stats.uniquePlayers)}
+          hint="Wallets that joined a match"
+          accent="silver"
+        />
+        <StatCard
+          icon={ShieldCheck}
+          label="Matches settled"
+          value={stats.loading ? "—" : String(stats.endedMatches)}
+          hint="Completed games"
+          accent="success"
+        />
       </section>
 
       {/* Games */}
@@ -163,10 +152,6 @@ function HomePage() {
               <div className="relative">
                 <div className="text-xs uppercase tracking-widest text-gold/80">{g.tagline}</div>
                 <div className="mt-2 text-2xl font-bold">{g.name}</div>
-                <div className="mt-6 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{g.players}</span>
-                  <span className="text-gradient-gold font-semibold">{g.pool}</span>
-                </div>
                 <div className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-silver group-hover:text-gold transition-smooth">
                   Enter lobby <ArrowRight className="h-3 w-3" />
                 </div>

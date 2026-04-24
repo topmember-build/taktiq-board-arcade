@@ -41,13 +41,13 @@ const META: Record<string, { name: string; rules: string; tagline: string; ready
     name: "Monopoly",
     rules: "Hasbro standard 1935 ruleset",
     tagline: "Buy, build, bankrupt — the classic property battle.",
-    ready: false,
+    ready: true,
   },
   scrabble: {
     name: "Scrabble",
     rules: "TWL/SOWPODS official dictionaries",
     tagline: "Score the highest with letter tiles on a 15×15 board.",
-    ready: false,
+    ready: true,
   },
 };
 

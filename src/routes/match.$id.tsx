@@ -337,13 +337,28 @@ function MatchRoomPage() {
           result: m.result,
         });
         if (moveErr) throw moveErr;
-        if (m.result) toast.success(`Game over - ${m.result}`);
+        if (m.result) {
+          toast.success(`Game over - ${m.result}`);
+          setConfirm({
+            status: "success",
+            title: "Game over",
+            message: `Final result: ${m.result}. Settlement is in progress.`,
+          });
+        } else {
+          toast.success("Move submitted ✓");
+        }
         setPendingMove(null);
         return true;
       } catch (e: any) {
         const msg = e?.message ?? "Network error";
         setPendingMove({ ...m, attempts: m.attempts + 1, error: msg });
-        toast.error(`Move failed: ${msg} - tap retry`);
+        setConfirm({
+          status: "error",
+          title: "Move failed to sync",
+          message: "Realtime sync didn't confirm your move.",
+          detail: msg,
+          onRetry: () => void flushMove({ ...m, attempts: m.attempts + 1, error: null }),
+        });
         return false;
       } finally {
         setSubmitting(false);

@@ -5,6 +5,7 @@ import { ArrowLeft, Trophy, Sparkles, Plus, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { toast } from "sonner";
+import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
 
 export const Route = createFileRoute("/games/$slug")({
   head: ({ params }) => ({

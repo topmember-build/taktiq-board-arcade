@@ -212,6 +212,8 @@ function GamePage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
     </div>
   );
 }

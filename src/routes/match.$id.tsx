@@ -141,6 +141,9 @@ function MatchRoomPage() {
   });
   const hostLocked = escrow.hostLocked;
 
+  // Anti-cheat audit logger - records move timing, disconnects, and flags rounds
+  const antiCheat = useAntiCheat(match?.id ?? null, address);
+
   // Determine my color/turn per game
   const myColor = useMemo(() => {
     if (!match) return null;

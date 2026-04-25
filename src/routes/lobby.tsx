@@ -377,6 +377,8 @@ function LobbyPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
     </div>
   );
 }

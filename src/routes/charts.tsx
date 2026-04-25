@@ -21,7 +21,7 @@ import {
 export const Route = createFileRoute("/charts")({
   head: () => ({
     meta: [
-      { title: "Live Charts — Monad & Testnet Markets — TaQtik" },
+      { title: "Live Charts - Monad & Testnet Markets - TaQtik" },
       {
         name: "description",
         content:
@@ -156,7 +156,7 @@ function ChartsPage() {
               </div>
             </div>
             <div className="mt-3 text-2xl font-bold">
-              {t.price > 0 ? `$${t.price.toFixed(t.price < 10 ? 4 : 2)}` : "—"}
+              {t.price > 0 ? `$${t.price.toFixed(t.price < 10 ? 4 : 2)}` : "-"}
             </div>
             {t.meta && (
               <div className="mt-1 text-[11px] text-silver flex items-center gap-1">
@@ -195,7 +195,7 @@ function ChartsPage() {
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold text-gradient-gold">
-              {current.price > 0 ? `$${current.price.toFixed(4)}` : "—"}
+              {current.price > 0 ? `$${current.price.toFixed(4)}` : "-"}
             </div>
             <div
               className={`text-sm ${current.change >= 0 ? "text-success" : "text-destructive"}`}

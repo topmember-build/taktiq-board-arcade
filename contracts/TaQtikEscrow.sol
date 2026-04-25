@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @title TaQtik Escrow — locks player stakes for a match and pays the winner.
+/// @title TaQtik Escrow - locks player stakes for a match and pays the winner.
 /// @notice Deploy on Monad testnet. The deployer is the rake/dispute keeper.
 ///         Both players stake the same amount. Winner takes 2 * stake minus 2.5% rake.
 contract TaQtikEscrow {

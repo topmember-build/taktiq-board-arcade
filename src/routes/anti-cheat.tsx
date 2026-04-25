@@ -5,7 +5,7 @@ import { StatCard } from "@/components/StatCard";
 export const Route = createFileRoute("/anti-cheat")({
   head: () => ({
     meta: [
-      { title: "Fair Play & Anti-Cheat — TaQtik" },
+      { title: "Fair Play & Anti-Cheat - TaQtik" },
       {
         name: "description",
         content: "How TaQtik enforces fair play across Chess, Checkers, and Backgammon matches.",
@@ -24,7 +24,7 @@ const PILLARS = [
   {
     icon: Eye,
     title: "Behavior fingerprinting",
-    text: "Move timing, mouse trajectories, and tab-focus events are hashed per match — collusion patterns surface immediately.",
+    text: "Move timing, mouse trajectories, and tab-focus events are hashed per match - collusion patterns surface immediately.",
   },
   {
     icon: Network,

@@ -1,5 +1,5 @@
-// Lightweight 2-player Monopoly engine — synchronous, deterministic state.
-// Not the full Hasbro rulebook (no auctions, trades, mortgages, houses) —
+// Lightweight 2-player Monopoly engine - synchronous, deterministic state.
+// Not the full Hasbro rulebook (no auctions, trades, mortgages, houses) -
 // implements: roll dice, move, buy property, pay rent, jail, GO bonus,
 // chance/community chest as simple cash deltas, bankruptcy = game over.
 
@@ -143,7 +143,7 @@ export function rollAndMove(state: MonopolyState, player: PlayerColor): Monopoly
 
   if (next.cash[player] < 0) {
     next.winner = opp(player);
-    next.log.push(`${player} is bankrupt — ${next.winner} wins!`);
+    next.log.push(`${player} is bankrupt - ${next.winner} wins!`);
     return next;
   }
   next.toMove = opp(player);
@@ -152,7 +152,7 @@ export function rollAndMove(state: MonopolyState, player: PlayerColor): Monopoly
 
 export function decideBuy(state: MonopolyState, player: PlayerColor, buy: boolean): MonopolyState {
   if (!state.awaitingDecision || state.toMove !== opp(player)) {
-    // toMove already advanced? No — buy prompt happens before turn end
+    // toMove already advanced? No - buy prompt happens before turn end
   }
   if (!state.awaitingDecision) return state;
   const next: MonopolyState = JSON.parse(JSON.stringify(state));

@@ -64,7 +64,7 @@ export function useMatchSync<T extends { id: string; updated_at?: string }>(
       )
       .subscribe();
 
-    // Polling fallback — runs every pollMs but only refetches if the realtime
+    // Polling fallback - runs every pollMs but only refetches if the realtime
     // channel hasn't pushed an update recently.
     const poll = setInterval(() => {
       if (Date.now() - lastEventAt > pollMs) {

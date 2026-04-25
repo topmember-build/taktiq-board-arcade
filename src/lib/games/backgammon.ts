@@ -1,4 +1,4 @@
-// Lightweight Backgammon engine — board is 24 points + bar + bear-off.
+// Lightweight Backgammon engine - board is 24 points + bar + bear-off.
 // White (+) moves toward point 23, Black (-) moves toward point 0.
 // Stores positive count for white pieces, negative for black on each point.
 

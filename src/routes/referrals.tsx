@@ -7,7 +7,7 @@ import { StatCard } from "@/components/StatCard";
 export const Route = createFileRoute("/referrals")({
   head: () => ({
     meta: [
-      { title: "Referrals — Earn with friends — TaQtik" },
+      { title: "Referrals - Earn with friends - TaQtik" },
       {
         name: "description",
         content: "Earn a share of every wager when friends play TaQtik through your referral link.",
@@ -35,7 +35,7 @@ function ReferralsPage() {
         <h1 className="text-3xl sm:text-4xl font-bold">Referrals</h1>
         <p className="text-muted-foreground mt-1">
           Invite friends and earn <span className="text-gold font-semibold">2%</span> of every
-          wager they place — automatically and forever.
+          wager they place - automatically and forever.
         </p>
       </div>
 

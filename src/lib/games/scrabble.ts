@@ -1,4 +1,4 @@
-// Lightweight Scrabble engine — 15x15 board, tile rack, scoring with bonus squares.
+// Lightweight Scrabble engine - 15x15 board, tile rack, scoring with bonus squares.
 // Not bundling a full TWL/SOWPODS dictionary in the client; words are validated
 // against a small built-in seed list plus optional online check via API later.
 // For now, any word ≥2 letters that uses placed tiles is accepted (honor system
@@ -166,7 +166,7 @@ export function placeWord(
         : next.scores.joiner > next.scores.host
           ? "joiner"
           : "draw";
-      next.log.push(`Game over — ${next.winner} wins!`);
+      next.log.push(`Game over - ${next.winner} wins!`);
     }
     return { ok: true, state: next, word, score };
   }
@@ -219,7 +219,7 @@ export function placeWord(
       : next.scores.joiner > next.scores.host
         ? "joiner"
         : "draw";
-    next.log.push(`Game over — ${next.winner} wins!`);
+    next.log.push(`Game over - ${next.winner} wins!`);
   }
   return { ok: true, state: next, word, score };
 }
@@ -233,7 +233,7 @@ export function passTurn(state: ScrabbleState, player: "host" | "joiner"): Scrab
       : next.scores.joiner > next.scores.host
         ? "joiner"
         : "draw";
-    next.log.push(`Game ended after consecutive passes — ${next.winner} wins.`);
+    next.log.push(`Game ended after consecutive passes - ${next.winner} wins.`);
   }
   return next;
 }

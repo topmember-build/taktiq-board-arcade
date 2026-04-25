@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/lobby")({
   head: () => ({
     meta: [
-      { title: "Game Lobby — TaQtik" },
+      { title: "Game Lobby - TaQtik" },
       {
         name: "description",
         content:
@@ -101,28 +101,30 @@ function LobbyPage() {
       return;
     }
     setCreating(true);
-    const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
-    const { data, error } = await supabase
-      .from("matches")
-      .insert({
-        game,
-        chain_id: chainId,
-        stake_amount: amount,
-        token_symbol: chain.symbol,
-        status: "open",
-        host_wallet: address,
-        time_control: timeCtrl,
-      })
-      .select("id")
-      .single();
-    setCreating(false);
-    if (error || !data) {
-      toast.error("Could not create match");
-      return;
+    try {
+      const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
+      const { data, error } = await supabase
+        .from("matches")
+        .insert({
+          game,
+          chain_id: chainId,
+          stake_amount: amount,
+          token_symbol: chain.symbol,
+          status: "open",
+          host_wallet: address,
+          time_control: timeCtrl,
+        })
+        .select("id")
+        .single();
+      if (error || !data) throw error ?? new Error("No match id returned");
+      toast.success(`${game[0].toUpperCase()}${game.slice(1)} match created`);
+      setHostOpen(false);
+      navigate({ to: "/match/$id", params: { id: data.id } });
+    } catch (error: any) {
+      toast.error(error?.message ?? "Could not create match");
+    } finally {
+      setCreating(false);
     }
-    toast.success("Match created!");
-    setHostOpen(false);
-    navigate({ to: "/match/$id", params: { id: data.id } });
   };
 
   const filtered = matches
@@ -178,7 +180,7 @@ function LobbyPage() {
 
       {filtered.length === 0 ? (
         <div className="text-center py-20 rounded-2xl border border-border/60 bg-gradient-card">
-          <p className="text-muted-foreground">No matches yet — be the first to host one.</p>
+          <p className="text-muted-foreground">No matches yet - be the first to host one.</p>
           <button
             onClick={() => setHostOpen(true)}
             className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gold/40 text-gold hover:bg-gold/10"

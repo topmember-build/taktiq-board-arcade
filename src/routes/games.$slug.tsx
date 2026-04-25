@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/games/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${capitalize(params.slug)} — TaQtik` },
+      { title: `${capitalize(params.slug)} - TaQtik` },
       { name: "description", content: `Play ${params.slug} for crypto on TaQtik.` },
     ],
   }),
@@ -28,7 +28,7 @@ const META: Record<string, { name: string; rules: string; tagline: string; ready
   checkers: {
     name: "Checkers",
     rules: "WCDF tournament rules",
-    tagline: "Quick, sharp, decisive — capture every piece to win.",
+    tagline: "Quick, sharp, decisive - capture every piece to win.",
     ready: true,
   },
   backgammon: {
@@ -40,7 +40,7 @@ const META: Record<string, { name: string; rules: string; tagline: string; ready
   monopoly: {
     name: "Monopoly",
     rules: "Hasbro standard 1935 ruleset",
-    tagline: "Buy, build, bankrupt — the classic property battle.",
+    tagline: "Buy, build, bankrupt - the classic property battle.",
     ready: true,
   },
   scrabble: {
@@ -71,26 +71,30 @@ function GamePage() {
       return;
     }
     setCreating(true);
-    const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
-    const { data, error } = await supabase
-      .from("matches")
-      .insert({
-        game: slug,
-        chain_id: chainId,
-        stake_amount: parseFloat(stake) || 1,
-        token_symbol: chain.symbol,
-        status: "open",
-        host_wallet: address,
-        time_control: "5+0",
-      })
-      .select("id")
-      .single();
-    setCreating(false);
-    if (error || !data) {
-      toast.error("Could not create match");
-      return;
+    try {
+      const amount = parseFloat(stake) || 1;
+      const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
+      const { data, error } = await supabase
+        .from("matches")
+        .insert({
+          game: slug,
+          chain_id: chainId,
+          stake_amount: amount,
+          token_symbol: chain.symbol,
+          status: "open",
+          host_wallet: address,
+          time_control: "5+0",
+        })
+        .select("id")
+        .single();
+      if (error || !data) throw error ?? new Error("No match id returned");
+      toast.success(`${meta.name} match created`);
+      navigate({ to: "/match/$id", params: { id: data.id } });
+    } catch (error: any) {
+      toast.error(error?.message ?? "Could not create match");
+    } finally {
+      setCreating(false);
     }
-    navigate({ to: "/match/$id", params: { id: data.id } });
   };
 
   return (
@@ -113,11 +117,11 @@ function GamePage() {
           <div className="flex items-center gap-2 text-sm">
             {meta.ready ? (
               <span className="inline-flex items-center gap-1 text-success">
-                <Sparkles className="h-3 w-3" /> Engine ready — host or join a match
+                <Sparkles className="h-3 w-3" /> Engine ready - host or join a match
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 text-muted-foreground">
-                <Sparkles className="h-3 w-3" /> Engine in development — chat + escrow live
+                <Sparkles className="h-3 w-3" /> Engine in development - chat + escrow live
               </span>
             )}
           </div>

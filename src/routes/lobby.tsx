@@ -45,6 +45,7 @@ function LobbyPage() {
   const [hostOpen, setHostOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
+  const [confirm, setConfirm] = useState<ConfirmModalState | null>(null);
 
   // Form state
   const [game, setGame] = useState<GameSlug>("chess");

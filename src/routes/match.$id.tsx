@@ -32,6 +32,7 @@ import { Chess } from "chess.js";
 import { toast } from "sonner";
 import { useMatchSync } from "@/hooks/useMatchSync";
 import { useEscrowVerifier } from "@/hooks/useEscrowVerifier";
+import { useAntiCheat } from "@/hooks/useAntiCheat";
 
 export const Route = createFileRoute("/match/$id")({
   head: ({ params }) => ({
@@ -139,6 +140,9 @@ function MatchRoomPage() {
     stakeAmount: match?.stake_amount ?? 0,
   });
   const hostLocked = escrow.hostLocked;
+
+  // Anti-cheat audit logger - records move timing, disconnects, and flags rounds
+  const antiCheat = useAntiCheat(match?.id ?? null, address);
 
   // Determine my color/turn per game
   const myColor = useMemo(() => {
@@ -295,6 +299,21 @@ function MatchRoomPage() {
   // Submit move - enqueues + tries once. UI exposes a retry button on failure.
   const submitMove = async (move: unknown, nextState: unknown, result: string | null) => {
     if (!match || !address) return;
+
+    // Audit: time the move and defensively re-validate chess SAN against engine
+    antiCheat.recordMove(move);
+    if (match.game === "chess") {
+      try {
+        const verifier = new Chess((match.current_state as string) ?? new Chess().fen());
+        const san = (move as { san?: string })?.san;
+        if (!san || !verifier.move(san)) {
+          antiCheat.recordImpossibleMove(move, "Chess engine rejected SAN");
+        }
+      } catch (err: any) {
+        antiCheat.recordImpossibleMove(move, err?.message ?? "Chess parse error");
+      }
+    }
+
     const queued: PendingMove = {
       id: `${Date.now()}`,
       move,

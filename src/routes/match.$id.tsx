@@ -299,6 +299,21 @@ function MatchRoomPage() {
   // Submit move - enqueues + tries once. UI exposes a retry button on failure.
   const submitMove = async (move: unknown, nextState: unknown, result: string | null) => {
     if (!match || !address) return;
+
+    // Audit: time the move and defensively re-validate chess SAN against engine
+    antiCheat.recordMove(move);
+    if (match.game === "chess") {
+      try {
+        const verifier = new Chess((match.current_state as string) ?? new Chess().fen());
+        const san = (move as { san?: string })?.san;
+        if (!san || !verifier.move(san)) {
+          antiCheat.recordImpossibleMove(move, "Chess engine rejected SAN");
+        }
+      } catch (err: any) {
+        antiCheat.recordImpossibleMove(move, err?.message ?? "Chess parse error");
+      }
+    }
+
     const queued: PendingMove = {
       id: `${Date.now()}`,
       move,

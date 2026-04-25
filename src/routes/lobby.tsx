@@ -5,6 +5,7 @@ import { Search, Plus, Users, Coins, Clock, X, Loader2 } from "lucide-react";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
 
 export const Route = createFileRoute("/lobby")({
   head: () => ({

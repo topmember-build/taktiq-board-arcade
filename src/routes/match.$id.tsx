@@ -82,6 +82,14 @@ function MatchRoomPage() {
   const [now, setNow] = useState(Date.now());
   const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [confirm, setConfirm] = useState<ConfirmModalState | null>(null);
+
+  const explorerTxUrl = (hash: string) =>
+    match?.chain_id === 10143
+      ? `https://testnet.monadexplorer.com/tx/${hash}`
+      : match?.chain_id === 5042002
+        ? `https://testnet.arcscan.app/tx/${hash}`
+        : `https://etherscan.io/tx/${hash}`;
 
   // Realtime + polling fallback for match state
   const { data: match, loading } = useMatchSync<MatchRow>(id);

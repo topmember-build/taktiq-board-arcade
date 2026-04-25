@@ -132,6 +132,13 @@ function MatchRoomPage() {
   const isMonad = match?.chain_id === 10143;
   const escrowReady = isMonad && isEscrowDeployed();
 
+  const explorerTxUrl = (hash: string) =>
+    match?.chain_id === 10143
+      ? `https://testnet.monadexplorer.com/tx/${hash}`
+      : match?.chain_id === 5042002
+        ? `https://testnet.arcscan.app/tx/${hash}`
+        : `https://etherscan.io/tx/${hash}`;
+
   // Verifier: polls on-chain + reconciles with DB to confirm locked funds
   const escrow = useEscrowVerifier({
     matchId: match?.id ?? null,

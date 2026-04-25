@@ -184,10 +184,21 @@ function MatchRoomPage() {
   const joinMatch = async () => {
     if (!address || !match) return;
     if (!hostLocked) {
-      toast.error("Host hasn't locked their stake yet - wait a moment.");
+      setConfirm({
+        status: "error",
+        title: "Cannot join yet",
+        message: "Host hasn't locked their stake on-chain yet.",
+        detail: "Wait a moment and try again once the host's escrow tx confirms.",
+        onRetry: () => joinMatch(),
+      });
       return;
     }
     setStaking(true);
+    setConfirm({
+      status: "pending",
+      title: "Joining match…",
+      message: "Locking your stake and joining the room.",
+    });
     try {
       let txHash: string | undefined;
       if (escrowReady) {
@@ -199,9 +210,6 @@ function MatchRoomPage() {
           value: parseEther(String(match.stake_amount)),
         });
         txHash = hash;
-        toast.message("Stake submitted - waiting for confirmation…");
-      } else if (isMonad) {
-        toast.message("Escrow address not configured - joining in demo mode.");
       }
 
       const { error } = await supabase
@@ -215,9 +223,23 @@ function MatchRoomPage() {
         })
         .eq("id", match.id);
       if (error) throw error;
+      setConfirm({
+        status: "success",
+        title: "Joined match ✓",
+        message: `You're in. Stake of ${match.stake_amount} ${match.token_symbol} locked.`,
+        txHash,
+        explorerUrl: txHash ? explorerTxUrl(txHash) : undefined,
+      });
       toast.success("Joined match - good luck!");
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Could not join");
+      const msg = e?.shortMessage ?? e?.message ?? "Could not join";
+      setConfirm({
+        status: "error",
+        title: "Failed to join",
+        message: "Your stake transaction or database write failed.",
+        detail: msg,
+        onRetry: () => joinMatch(),
+      });
     } finally {
       setStaking(false);
     }
@@ -227,6 +249,11 @@ function MatchRoomPage() {
   const hostStake = async () => {
     if (!address || !match) return;
     setStaking(true);
+    setConfirm({
+      status: "pending",
+      title: "Locking stake…",
+      message: "Submitting escrow transaction. Approve in your wallet.",
+    });
     try {
       if (escrowReady) {
         const hash = await writeContractAsync({
@@ -237,23 +264,43 @@ function MatchRoomPage() {
           value: parseEther(String(match.stake_amount)),
         });
         setPendingTx(hash);
-        toast.message("Stake submitted - waiting for confirmation…");
+        setConfirm({
+          status: "success",
+          title: "Stake submitted ✓",
+          message: "Waiting for on-chain confirmation. Opponents can join once it's mined.",
+          txHash: hash,
+          explorerUrl: explorerTxUrl(hash),
+        });
       } else if (isMonad) {
-        toast.message("Escrow not deployed yet - running in demo mode.");
         await supabase
           .from("matches")
           .update({ escrow_tx_hash: "demo" })
           .eq("id", match.id);
+        setConfirm({
+          status: "success",
+          title: "Stake locked (demo)",
+          message: "Escrow contract not deployed yet - running in demo mode.",
+        });
       } else {
-        // Non-Monad chain - mark as demo lock
         await supabase
           .from("matches")
           .update({ escrow_tx_hash: "demo" })
           .eq("id", match.id);
-        toast.success("Stake locked (demo mode for this chain)");
+        setConfirm({
+          status: "success",
+          title: "Stake locked (demo)",
+          message: `Demo mode for ${chain?.name ?? "this chain"}. Match is open for joiners.`,
+        });
       }
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Stake failed");
+      const msg = e?.shortMessage ?? e?.message ?? "Stake failed";
+      setConfirm({
+        status: "error",
+        title: "Stake failed",
+        message: "We couldn't lock your stake.",
+        detail: msg,
+        onRetry: () => hostStake(),
+      });
     } finally {
       setStaking(false);
     }

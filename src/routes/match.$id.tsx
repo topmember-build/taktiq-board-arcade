@@ -32,6 +32,7 @@ import { Chess } from "chess.js";
 import { toast } from "sonner";
 import { useMatchSync } from "@/hooks/useMatchSync";
 import { useEscrowVerifier } from "@/hooks/useEscrowVerifier";
+import { useAntiCheat } from "@/hooks/useAntiCheat";
 
 export const Route = createFileRoute("/match/$id")({
   head: ({ params }) => ({

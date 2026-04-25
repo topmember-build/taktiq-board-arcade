@@ -7,7 +7,7 @@ import { useState } from "react";
 export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
-      { title: "Wallet — Deposit & Withdraw — TaQtik" },
+      { title: "Wallet - Deposit & Withdraw - TaQtik" },
       {
         name: "description",
         content: "Deposit MON or testnet tokens to bet on board games. Withdraw your winnings anytime.",
@@ -62,7 +62,7 @@ function WalletPage() {
             Native balance
           </div>
           <div className="mt-1 text-3xl font-bold text-gradient-gold">
-            {balance ? `${Number(balance.formatted).toFixed(4)} ${balance.symbol}` : "—"}
+            {balance ? `${Number(balance.formatted).toFixed(4)} ${balance.symbol}` : "-"}
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">
             <button

@@ -97,7 +97,7 @@ export function MatchChat({ matchId, wallet }: { matchId: string; wallet?: strin
       <div ref={scrollRef} className="flex-1 overflow-y-auto py-3 space-y-2 text-sm">
         {messages.length === 0 && (
           <div className="text-xs text-muted-foreground text-center py-8">
-            Say hi to your opponent. Be respectful — chat is logged for fair-play review.
+            Say hi to your opponent. Be respectful - chat is logged for fair-play review.
           </div>
         )}
         {messages.map((m) => {

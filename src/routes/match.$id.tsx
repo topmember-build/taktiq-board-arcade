@@ -36,7 +36,7 @@ import { useEscrowVerifier } from "@/hooks/useEscrowVerifier";
 export const Route = createFileRoute("/match/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: `Match ${params.id.slice(0, 8)} — TaQtik` },
+      { title: `Match ${params.id.slice(0, 8)} - TaQtik` },
       { name: "description", content: "Live on-chain board game match on TaQtik." },
     ],
   }),
@@ -167,11 +167,11 @@ function MatchRoomPage() {
     return null;
   };
 
-  // Join match — locks stake on-chain (when escrow live) before flipping status
+  // Join match - locks stake on-chain (when escrow live) before flipping status
   const joinMatch = async () => {
     if (!address || !match) return;
     if (!hostLocked) {
-      toast.error("Host hasn't locked their stake yet — wait a moment.");
+      toast.error("Host hasn't locked their stake yet - wait a moment.");
       return;
     }
     setStaking(true);
@@ -186,9 +186,9 @@ function MatchRoomPage() {
           value: parseEther(String(match.stake_amount)),
         });
         txHash = hash;
-        toast.message("Stake submitted — waiting for confirmation…");
+        toast.message("Stake submitted - waiting for confirmation…");
       } else if (isMonad) {
-        toast.message("Escrow address not configured — joining in demo mode.");
+        toast.message("Escrow address not configured - joining in demo mode.");
       }
 
       const { error } = await supabase
@@ -202,7 +202,7 @@ function MatchRoomPage() {
         })
         .eq("id", match.id);
       if (error) throw error;
-      toast.success("Joined match — good luck!");
+      toast.success("Joined match - good luck!");
     } catch (e: any) {
       toast.error(e?.shortMessage ?? e?.message ?? "Could not join");
     } finally {
@@ -224,15 +224,15 @@ function MatchRoomPage() {
           value: parseEther(String(match.stake_amount)),
         });
         setPendingTx(hash);
-        toast.message("Stake submitted — waiting for confirmation…");
+        toast.message("Stake submitted - waiting for confirmation…");
       } else if (isMonad) {
-        toast.message("Escrow not deployed yet — running in demo mode.");
+        toast.message("Escrow not deployed yet - running in demo mode.");
         await supabase
           .from("matches")
           .update({ escrow_tx_hash: "demo" })
           .eq("id", match.id);
       } else {
-        // Non-Monad chain — mark as demo lock
+        // Non-Monad chain - mark as demo lock
         await supabase
           .from("matches")
           .update({ escrow_tx_hash: "demo" })
@@ -277,13 +277,13 @@ function MatchRoomPage() {
           result: m.result,
         });
         if (moveErr) throw moveErr;
-        if (m.result) toast.success(`Game over — ${m.result}`);
+        if (m.result) toast.success(`Game over - ${m.result}`);
         setPendingMove(null);
         return true;
       } catch (e: any) {
         const msg = e?.message ?? "Network error";
         setPendingMove({ ...m, attempts: m.attempts + 1, error: msg });
-        toast.error(`Move failed: ${msg} — tap retry`);
+        toast.error(`Move failed: ${msg} - tap retry`);
         return false;
       } finally {
         setSubmitting(false);
@@ -292,7 +292,7 @@ function MatchRoomPage() {
     [match, address],
   );
 
-  // Submit move — enqueues + tries once. UI exposes a retry button on failure.
+  // Submit move - enqueues + tries once. UI exposes a retry button on failure.
   const submitMove = async (move: unknown, nextState: unknown, result: string | null) => {
     if (!match || !address) return;
     const queued: PendingMove = {
@@ -467,7 +467,7 @@ function MatchRoomPage() {
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-destructive">Move not saved</div>
                 <div className="text-xs text-muted-foreground truncate">
-                  Attempt {pendingMove.attempts} — {pendingMove.error}
+                  Attempt {pendingMove.attempts} - {pendingMove.error}
                 </div>
               </div>
               <button
@@ -524,7 +524,7 @@ function MatchRoomPage() {
                 {staking && <Loader2 className="h-4 w-4 animate-spin" />}
                 {staking
                   ? "Locking stake…"
-                  : `Match stake — ${match.stake_amount} ${match.token_symbol}`}
+                  : `Match stake - ${match.stake_amount} ${match.token_symbol}`}
               </button>
             )}
 
@@ -552,7 +552,7 @@ function MatchRoomPage() {
               </a>
             )}
 
-            {/* Escrow verifier — polls on-chain + DB to confirm locked funds */}
+            {/* Escrow verifier - polls on-chain + DB to confirm locked funds */}
             {escrowReady && match.escrow_tx_hash && (
               <div className="mt-4 rounded-lg border border-border/60 bg-background/40 p-3 text-[11px] space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -612,7 +612,7 @@ function MatchRoomPage() {
               <span className="font-mono text-xs">
                 {match.host_wallet
                   ? `${match.host_wallet.slice(0, 6)}…${match.host_wallet.slice(-4)}`
-                  : "—"}
+                  : "-"}
               </span>
             </div>
             <div className="flex items-center justify-between">

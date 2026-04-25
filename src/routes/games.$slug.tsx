@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/games/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${capitalize(params.slug)} — TaQtik` },
+      { title: `${capitalize(params.slug)} - TaQtik` },
       { name: "description", content: `Play ${params.slug} for crypto on TaQtik.` },
     ],
   }),
@@ -28,7 +28,7 @@ const META: Record<string, { name: string; rules: string; tagline: string; ready
   checkers: {
     name: "Checkers",
     rules: "WCDF tournament rules",
-    tagline: "Quick, sharp, decisive — capture every piece to win.",
+    tagline: "Quick, sharp, decisive - capture every piece to win.",
     ready: true,
   },
   backgammon: {
@@ -40,7 +40,7 @@ const META: Record<string, { name: string; rules: string; tagline: string; ready
   monopoly: {
     name: "Monopoly",
     rules: "Hasbro standard 1935 ruleset",
-    tagline: "Buy, build, bankrupt — the classic property battle.",
+    tagline: "Buy, build, bankrupt - the classic property battle.",
     ready: true,
   },
   scrabble: {
@@ -113,11 +113,11 @@ function GamePage() {
           <div className="flex items-center gap-2 text-sm">
             {meta.ready ? (
               <span className="inline-flex items-center gap-1 text-success">
-                <Sparkles className="h-3 w-3" /> Engine ready — host or join a match
+                <Sparkles className="h-3 w-3" /> Engine ready - host or join a match
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 text-muted-foreground">
-                <Sparkles className="h-3 w-3" /> Engine in development — chat + escrow live
+                <Sparkles className="h-3 w-3" /> Engine in development - chat + escrow live
               </span>
             )}
           </div>

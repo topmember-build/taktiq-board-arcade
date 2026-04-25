@@ -17,7 +17,7 @@ import { useDappStats } from "@/hooks/useDappStats";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "TaQtik — Play. Bet. Win. Crypto Board Game Arcade" },
+      { title: "TaQtik - Play. Bet. Win. Crypto Board Game Arcade" },
       {
         name: "description",
         content:
@@ -54,7 +54,7 @@ function HomePage() {
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
               Connect your wallet. Deposit MON or your favorite testnet token. Out-think your
-              opponent on real, regulated board games — Chess, Checkers, and Backgammon — and let
+              opponent on real, regulated board games - Chess, Checkers, and Backgammon - and let
               the smart contract pay the winner.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -99,32 +99,32 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Stats — real numbers from DB */}
+      {/* Stats - real numbers from DB */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Swords}
           label="Active matches"
-          value={stats.loading ? "—" : String(stats.activeMatches)}
+          value={stats.loading ? "-" : String(stats.activeMatches)}
           hint={stats.loading ? "Loading…" : "Open + live rooms"}
         />
         <StatCard
           icon={Trophy}
           label="Active prize pool"
-          value={stats.loading ? "—" : `${stats.totalPool.toFixed(2)}`}
+          value={stats.loading ? "-" : `${stats.totalPool.toFixed(2)}`}
           hint="Sum of staked tokens"
           accent="success"
         />
         <StatCard
           icon={Users}
           label="Unique players"
-          value={stats.loading ? "—" : String(stats.uniquePlayers)}
+          value={stats.loading ? "-" : String(stats.uniquePlayers)}
           hint="Wallets that joined a match"
           accent="silver"
         />
         <StatCard
           icon={ShieldCheck}
           label="Matches settled"
-          value={stats.loading ? "—" : String(stats.endedMatches)}
+          value={stats.loading ? "-" : String(stats.endedMatches)}
           hint="Completed games"
           accent="success"
         />
@@ -180,7 +180,7 @@ function HomePage() {
           {
             icon: Users,
             title: "Earn from referrals",
-            text: "Share your code and earn a share of every wager your friends make — paid out automatically per match.",
+            text: "Share your code and earn a share of every wager your friends make - paid out automatically per match.",
           },
         ].map((f) => (
           <div

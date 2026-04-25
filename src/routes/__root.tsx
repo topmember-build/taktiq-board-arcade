@@ -8,7 +8,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TaQtik — Crypto Board Game Arcade" },
+      { title: "TaQtik - Crypto Board Game Arcade" },
       {
         name: "description",
         content:
@@ -16,7 +16,7 @@ export const Route = createRootRoute({
       },
       { name: "author", content: "TaQtik" },
       { name: "theme-color", content: "#0d0d12" },
-      { property: "og:title", content: "TaQtik — Crypto Board Game Arcade" },
+      { property: "og:title", content: "TaQtik - Crypto Board Game Arcade" },
       {
         property: "og:description",
         content:

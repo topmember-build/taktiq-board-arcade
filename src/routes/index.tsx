@@ -170,7 +170,7 @@ function HomePage() {
           {
             icon: Wallet,
             title: "Wallet-first identity",
-            text: "No emails, no passwords. Your wallet is your account. Optionally bind Google for recovery and notifications.",
+            text: "No emails, no passwords. Your wallet is your account and primary identity across every match.",
           },
           {
             icon: ShieldCheck,

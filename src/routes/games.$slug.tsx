@@ -5,6 +5,7 @@ import { ArrowLeft, Trophy, Sparkles, Plus, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { toast } from "sonner";
+import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
 
 export const Route = createFileRoute("/games/$slug")({
   head: ({ params }) => ({
@@ -64,13 +65,23 @@ function GamePage() {
   const [creating, setCreating] = useState(false);
   const [stake, setStake] = useState("1");
   const [chainId, setChainId] = useState(SUPPORTED_CHAINS[0].id);
+  const [confirm, setConfirm] = useState<ConfirmModalState | null>(null);
 
   const host = async () => {
     if (!address) {
-      toast.error("Connect your wallet first");
+      setConfirm({
+        status: "error",
+        title: "Wallet required",
+        message: "Connect your wallet to host a match.",
+      });
       return;
     }
     setCreating(true);
+    setConfirm({
+      status: "pending",
+      title: "Creating match…",
+      message: `Spinning up your ${meta.name} room.`,
+    });
     try {
       const amount = parseFloat(stake) || 1;
       const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
@@ -89,9 +100,20 @@ function GamePage() {
         .single();
       if (error || !data) throw error ?? new Error("No match id returned");
       toast.success(`${meta.name} match created`);
-      navigate({ to: "/match/$id", params: { id: data.id } });
+      setConfirm({
+        status: "success",
+        title: "Match created ✓",
+        message: `Heading to your ${meta.name} room.`,
+      });
+      setTimeout(() => navigate({ to: "/match/$id", params: { id: data.id } }), 400);
     } catch (error: any) {
-      toast.error(error?.message ?? "Could not create match");
+      setConfirm({
+        status: "error",
+        title: "Could not create match",
+        message: "The room failed to save.",
+        detail: error?.message ?? "Unknown error",
+        onRetry: () => host(),
+      });
     } finally {
       setCreating(false);
     }
@@ -190,6 +212,8 @@ function GamePage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
     </div>
   );
 }

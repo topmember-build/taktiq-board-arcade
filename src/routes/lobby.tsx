@@ -5,6 +5,7 @@ import { Search, Plus, Users, Coins, Clock, X, Loader2 } from "lucide-react";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
 
 export const Route = createFileRoute("/lobby")({
   head: () => ({
@@ -44,6 +45,7 @@ function LobbyPage() {
   const [hostOpen, setHostOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
+  const [confirm, setConfirm] = useState<ConfirmModalState | null>(null);
 
   // Form state
   const [game, setGame] = useState<GameSlug>("chess");
@@ -92,15 +94,28 @@ function LobbyPage() {
 
   const createMatch = async () => {
     if (!address) {
-      toast.error("Connect your wallet to host a match");
+      setConfirm({
+        status: "error",
+        title: "Wallet required",
+        message: "Connect your wallet to host a match.",
+      });
       return;
     }
     const amount = parseFloat(stake);
     if (!Number.isFinite(amount) || amount <= 0) {
-      toast.error("Enter a valid stake");
+      setConfirm({
+        status: "error",
+        title: "Invalid stake",
+        message: "Enter a valid stake amount greater than zero.",
+      });
       return;
     }
     setCreating(true);
+    setConfirm({
+      status: "pending",
+      title: "Creating match…",
+      message: "Saving the room. You'll be moved to the table next.",
+    });
     try {
       const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
       const { data, error } = await supabase
@@ -118,10 +133,22 @@ function LobbyPage() {
         .single();
       if (error || !data) throw error ?? new Error("No match id returned");
       toast.success(`${game[0].toUpperCase()}${game.slice(1)} match created`);
+      setConfirm({
+        status: "success",
+        title: "Match created ✓",
+        message: `Your ${game} room is open. Lock your stake on the next screen to allow joiners.`,
+      });
       setHostOpen(false);
-      navigate({ to: "/match/$id", params: { id: data.id } });
+      // brief pause so the user sees the confirmation before navigating
+      setTimeout(() => navigate({ to: "/match/$id", params: { id: data.id } }), 400);
     } catch (error: any) {
-      toast.error(error?.message ?? "Could not create match");
+      setConfirm({
+        status: "error",
+        title: "Could not create match",
+        message: "The room failed to save.",
+        detail: error?.message ?? "Unknown error",
+        onRetry: () => createMatch(),
+      });
     } finally {
       setCreating(false);
     }
@@ -350,6 +377,8 @@ function LobbyPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
     </div>
   );
 }

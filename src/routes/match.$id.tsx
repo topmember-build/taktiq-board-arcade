@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { useMatchSync } from "@/hooks/useMatchSync";
 import { useEscrowVerifier } from "@/hooks/useEscrowVerifier";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
+import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
 
 export const Route = createFileRoute("/match/$id")({
   head: ({ params }) => ({
@@ -81,6 +82,7 @@ function MatchRoomPage() {
   const [now, setNow] = useState(Date.now());
   const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [confirm, setConfirm] = useState<ConfirmModalState | null>(null);
 
   // Realtime + polling fallback for match state
   const { data: match, loading } = useMatchSync<MatchRow>(id);
@@ -130,6 +132,13 @@ function MatchRoomPage() {
   const isMonad = match?.chain_id === 10143;
   const escrowReady = isMonad && isEscrowDeployed();
 
+  const explorerTxUrl = (hash: string) =>
+    match?.chain_id === 10143
+      ? `https://testnet.monadexplorer.com/tx/${hash}`
+      : match?.chain_id === 5042002
+        ? `https://testnet.arcscan.app/tx/${hash}`
+        : `https://etherscan.io/tx/${hash}`;
+
   // Verifier: polls on-chain + reconciles with DB to confirm locked funds
   const escrow = useEscrowVerifier({
     matchId: match?.id ?? null,
@@ -175,10 +184,21 @@ function MatchRoomPage() {
   const joinMatch = async () => {
     if (!address || !match) return;
     if (!hostLocked) {
-      toast.error("Host hasn't locked their stake yet - wait a moment.");
+      setConfirm({
+        status: "error",
+        title: "Cannot join yet",
+        message: "Host hasn't locked their stake on-chain yet.",
+        detail: "Wait a moment and try again once the host's escrow tx confirms.",
+        onRetry: () => joinMatch(),
+      });
       return;
     }
     setStaking(true);
+    setConfirm({
+      status: "pending",
+      title: "Joining match…",
+      message: "Locking your stake and joining the room.",
+    });
     try {
       let txHash: string | undefined;
       if (escrowReady) {
@@ -190,9 +210,6 @@ function MatchRoomPage() {
           value: parseEther(String(match.stake_amount)),
         });
         txHash = hash;
-        toast.message("Stake submitted - waiting for confirmation…");
-      } else if (isMonad) {
-        toast.message("Escrow address not configured - joining in demo mode.");
       }
 
       const { error } = await supabase
@@ -206,9 +223,23 @@ function MatchRoomPage() {
         })
         .eq("id", match.id);
       if (error) throw error;
+      setConfirm({
+        status: "success",
+        title: "Joined match ✓",
+        message: `You're in. Stake of ${match.stake_amount} ${match.token_symbol} locked.`,
+        txHash,
+        explorerUrl: txHash ? explorerTxUrl(txHash) : undefined,
+      });
       toast.success("Joined match - good luck!");
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Could not join");
+      const msg = e?.shortMessage ?? e?.message ?? "Could not join";
+      setConfirm({
+        status: "error",
+        title: "Failed to join",
+        message: "Your stake transaction or database write failed.",
+        detail: msg,
+        onRetry: () => joinMatch(),
+      });
     } finally {
       setStaking(false);
     }
@@ -218,6 +249,11 @@ function MatchRoomPage() {
   const hostStake = async () => {
     if (!address || !match) return;
     setStaking(true);
+    setConfirm({
+      status: "pending",
+      title: "Locking stake…",
+      message: "Submitting escrow transaction. Approve in your wallet.",
+    });
     try {
       if (escrowReady) {
         const hash = await writeContractAsync({
@@ -228,23 +264,43 @@ function MatchRoomPage() {
           value: parseEther(String(match.stake_amount)),
         });
         setPendingTx(hash);
-        toast.message("Stake submitted - waiting for confirmation…");
+        setConfirm({
+          status: "success",
+          title: "Stake submitted ✓",
+          message: "Waiting for on-chain confirmation. Opponents can join once it's mined.",
+          txHash: hash,
+          explorerUrl: explorerTxUrl(hash),
+        });
       } else if (isMonad) {
-        toast.message("Escrow not deployed yet - running in demo mode.");
         await supabase
           .from("matches")
           .update({ escrow_tx_hash: "demo" })
           .eq("id", match.id);
+        setConfirm({
+          status: "success",
+          title: "Stake locked (demo)",
+          message: "Escrow contract not deployed yet - running in demo mode.",
+        });
       } else {
-        // Non-Monad chain - mark as demo lock
         await supabase
           .from("matches")
           .update({ escrow_tx_hash: "demo" })
           .eq("id", match.id);
-        toast.success("Stake locked (demo mode for this chain)");
+        setConfirm({
+          status: "success",
+          title: "Stake locked (demo)",
+          message: `Demo mode for ${chain?.name ?? "this chain"}. Match is open for joiners.`,
+        });
       }
     } catch (e: any) {
-      toast.error(e?.shortMessage ?? e?.message ?? "Stake failed");
+      const msg = e?.shortMessage ?? e?.message ?? "Stake failed";
+      setConfirm({
+        status: "error",
+        title: "Stake failed",
+        message: "We couldn't lock your stake.",
+        detail: msg,
+        onRetry: () => hostStake(),
+      });
     } finally {
       setStaking(false);
     }
@@ -281,13 +337,28 @@ function MatchRoomPage() {
           result: m.result,
         });
         if (moveErr) throw moveErr;
-        if (m.result) toast.success(`Game over - ${m.result}`);
+        if (m.result) {
+          toast.success(`Game over - ${m.result}`);
+          setConfirm({
+            status: "success",
+            title: "Game over",
+            message: `Final result: ${m.result}. Settlement is in progress.`,
+          });
+        } else {
+          toast.success("Move submitted ✓");
+        }
         setPendingMove(null);
         return true;
       } catch (e: any) {
         const msg = e?.message ?? "Network error";
         setPendingMove({ ...m, attempts: m.attempts + 1, error: msg });
-        toast.error(`Move failed: ${msg} - tap retry`);
+        setConfirm({
+          status: "error",
+          title: "Move failed to sync",
+          message: "Realtime sync didn't confirm your move.",
+          detail: msg,
+          onRetry: () => void flushMove({ ...m, attempts: m.attempts + 1, error: null }),
+        });
         return false;
       } finally {
         setSubmitting(false);
@@ -665,6 +736,8 @@ function MatchRoomPage() {
           <MatchChat matchId={match.id} wallet={address} />
         </div>
       </div>
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
     </div>
   );
 }

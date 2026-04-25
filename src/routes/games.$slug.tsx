@@ -71,26 +71,30 @@ function GamePage() {
       return;
     }
     setCreating(true);
-    const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
-    const { data, error } = await supabase
-      .from("matches")
-      .insert({
-        game: slug,
-        chain_id: chainId,
-        stake_amount: parseFloat(stake) || 1,
-        token_symbol: chain.symbol,
-        status: "open",
-        host_wallet: address,
-        time_control: "5+0",
-      })
-      .select("id")
-      .single();
-    setCreating(false);
-    if (error || !data) {
-      toast.error("Could not create match");
-      return;
+    try {
+      const amount = parseFloat(stake) || 1;
+      const chain = SUPPORTED_CHAINS.find((c) => c.id === chainId)!;
+      const { data, error } = await supabase
+        .from("matches")
+        .insert({
+          game: slug,
+          chain_id: chainId,
+          stake_amount: amount,
+          token_symbol: chain.symbol,
+          status: "open",
+          host_wallet: address,
+          time_control: "5+0",
+        })
+        .select("id")
+        .single();
+      if (error || !data) throw error ?? new Error("No match id returned");
+      toast.success(`${meta.name} match created`);
+      navigate({ to: "/match/$id", params: { id: data.id } });
+    } catch (error: any) {
+      toast.error(error?.message ?? "Could not create match");
+    } finally {
+      setCreating(false);
     }
-    navigate({ to: "/match/$id", params: { id: data.id } });
   };
 
   return (

@@ -736,6 +736,8 @@ function MatchRoomPage() {
           <MatchChat matchId={match.id} wallet={address} />
         </div>
       </div>
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
     </div>
   );
 }

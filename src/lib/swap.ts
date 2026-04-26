@@ -84,7 +84,7 @@ export function buildExactInputSingleCalldata(args: {
       {
         tokenIn: args.tokenIn,
         tokenOut: args.tokenOut,
-        fee: args.feeTier ?? args.fee,
+        fee: args.fee,
         recipient: args.recipient,
         amountIn: args.amountIn,
         amountOutMinimum: args.amountOutMinimum,

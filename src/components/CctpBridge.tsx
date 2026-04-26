@@ -244,9 +244,36 @@ export function CctpBridge() {
         </span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Move native USDC between testnets in two on-chain steps - burn on the source, mint on the
-        destination - using Circle&apos;s official CCTP v2 contracts.
+        Move native USDC between testnets using Circle&apos;s official CCTP v2 contracts. Pay in
+        USDC, or pay in ETH and we&apos;ll swap to USDC on the source chain via Uniswap V3 first.
       </p>
+
+      <div>
+        <label className="text-xs uppercase tracking-widest text-muted-foreground">
+          Source token
+        </label>
+        <div className="mt-2 inline-flex rounded-lg border border-border bg-input p-1 text-sm">
+          {(["USDC", "ETH"] as SourceToken[]).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setSourceToken(t)}
+              className={`px-4 py-1.5 rounded-md font-medium transition-smooth ${
+                sourceToken === t
+                  ? "bg-gradient-gold text-primary-foreground shadow-gold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+        {sourceToken === "ETH" && !findSwapRoute(from.chainId) && (
+          <p className="mt-2 text-[11px] text-destructive">
+            ETH→USDC swap is not configured on {from.name}. Pick another source chain.
+          </p>
+        )}
+      </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
         <div>
@@ -281,14 +308,21 @@ export function CctpBridge() {
 
       <div>
         <label className="text-xs uppercase tracking-widest text-muted-foreground">
-          Amount (USDC)
+          Amount ({sourceToken})
         </label>
         <input
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          step={sourceToken === "ETH" ? "0.001" : "1"}
           className="mt-2 w-full px-3 py-2.5 rounded-lg bg-input border border-border text-lg font-semibold focus:outline-none focus:border-gold/60"
         />
+        {sourceToken === "ETH" && (
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            We&apos;ll swap your ETH to USDC on {from.name} (Uniswap V3, 0.05% pool) and bridge the
+            received USDC to {to.name}.
+          </p>
+        )}
       </div>
 
       <div>
@@ -312,8 +346,18 @@ export function CctpBridge() {
         {stepLabel[step]}
       </button>
 
-      {(burnHash || mintHash || error) && (
+      {(swapHash || burnHash || mintHash || error) && (
         <div className="text-xs space-y-1.5 border-t border-border/60 pt-4">
+          {swapHash && (
+            <a
+              href={explorerTxUrl(from.chainId, swapHash)}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-silver hover:text-gold"
+            >
+              <ExternalLink className="h-3 w-3" /> Swap tx on {from.name}
+            </a>
+          )}
           {burnHash && (
             <a
               href={explorerTxUrl(from.chainId, burnHash)}

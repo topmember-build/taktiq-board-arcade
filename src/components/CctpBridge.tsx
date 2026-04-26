@@ -73,7 +73,7 @@ export function CctpBridge() {
     }
     const amt = parseFloat(amount);
     if (!Number.isFinite(amt) || amt <= 0) {
-      toast.error("Enter a valid USDC amount");
+      toast.error(`Enter a valid ${sourceToken} amount`);
       return;
     }
     if (!recipient.startsWith("0x") || recipient.length !== 42) {
@@ -87,7 +87,64 @@ export function CctpBridge() {
         await switchChainAsync({ chainId: from.chainId });
       }
 
-      const value = parseUnits(amount, 6); // USDC = 6 decimals
+      let value: bigint; // USDC amount (6 decimals) that will be burned
+
+      // 0. Optional ETH → USDC swap on the source chain via Uniswap V3.
+      if (sourceToken === "ETH") {
+        const route = findSwapRoute(from.chainId);
+        if (!route) throw new Error(`ETH→USDC swap is not available on ${from.name} yet.`);
+        if (!publicClient) throw new Error("Public RPC client not ready");
+        setStep("swapping");
+
+        const ethIn = parseEther(amount);
+        // Snapshot USDC balance so we can measure the swap output precisely.
+        const balBefore = (await publicClient.call({
+          to: route.usdc,
+          data: buildBalanceOfCalldata(address),
+        })).data;
+        const before = balBefore
+          ? (decodeAbiParameters([{ type: "uint256" }], balBefore)[0] as bigint)
+          : 0n;
+
+        const swap = await walletClient.sendTransaction({
+          to: route.swapRouter,
+          data: buildExactInputSingleCalldata({
+            tokenIn: route.weth,
+            tokenOut: route.usdc,
+            fee: route.feeTier,
+            recipient: address,
+            amountIn: ethIn,
+            amountOutMinimum: 0n, // testnet — accept any quote; UI surfaces final amount
+          }),
+          value: ethIn,
+        });
+        setSwapHash(swap);
+        await publicClient.waitForTransactionReceipt({ hash: swap });
+
+        const balAfter = (await publicClient.call({
+          to: route.usdc,
+          data: buildBalanceOfCalldata(address),
+        })).data;
+        const after = balAfter
+          ? (decodeAbiParameters([{ type: "uint256" }], balAfter)[0] as bigint)
+          : 0n;
+        value = after - before;
+        if (value <= 0n) throw new Error("Swap returned 0 USDC. The pool may be illiquid on this testnet.");
+
+        await supabase.from("wallet_transactions").insert({
+          wallet_address: address.toLowerCase(),
+          profile_id: address.toLowerCase(),
+          chain_id: from.chainId,
+          tx_type: "swap_eth_usdc",
+          amount: amt,
+          token_symbol: "ETH",
+          tx_hash: swap,
+          status: "confirmed",
+        });
+      } else {
+        value = parseUnits(amount, 6); // USDC = 6 decimals
+      }
+
       const maxFee = (value * 5n) / 10000n; // 5 bps cap (testnet)
 
       // 1. Approve
@@ -165,7 +222,8 @@ export function CctpBridge() {
   };
 
   const stepLabel: Record<Step, string> = {
-    idle: "Bridge USDC",
+    idle: sourceToken === "ETH" ? "Swap ETH & bridge to USDC" : "Bridge USDC",
+    swapping: "Swapping ETH → USDC…",
     approving: "Approving USDC…",
     burning: "Burning on source…",
     "waiting-attestation": "Waiting for Circle attestation…",

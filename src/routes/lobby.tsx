@@ -154,7 +154,34 @@ function LobbyPage() {
     }
   };
 
+  const cancelMatch = async (id: string) => {
+    if (!address) return;
+    const ok = window.confirm("Cancel this hosted match? Joiners will no longer be able to join.");
+    if (!ok) return;
+    const { error } = await supabase
+      .from("matches")
+      .update({ status: "cancelled", ended_at: new Date().toISOString() })
+      .eq("id", id)
+      .ilike("host_wallet", address.toLowerCase())
+      .eq("status", "open");
+    if (error) {
+      toast.error(`Could not cancel: ${error.message}`);
+    } else {
+      toast.success("Match cancelled");
+      setMatches((prev) => prev.filter((m) => m.id !== id));
+    }
+  };
+
+  const myHosted = address
+    ? matches.filter(
+        (m) =>
+          m.host_wallet?.toLowerCase() === address.toLowerCase() &&
+          (m.status === "open" || m.status === "live"),
+      )
+    : [];
+
   const filtered = matches
+    .filter((m) => m.status === "open" || m.status === "live")
     .filter((m) => (filter === "all" ? true : m.game === filter))
     .filter((m) =>
       search
@@ -179,6 +206,61 @@ function LobbyPage() {
           <Plus className="h-4 w-4" /> Host a match
         </button>
       </div>
+
+      {/* My hosted matches */}
+      {address && myHosted.length > 0 && (
+        <div className="rounded-2xl border border-gold/30 bg-gradient-card p-5 shadow-gold space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gradient-gold uppercase tracking-widest">
+              Your hosted matches
+            </h2>
+            <span className="text-[11px] text-muted-foreground">{myHosted.length} active</span>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {myHosted.map((m) => {
+              const ch = SUPPORTED_CHAINS.find((c) => c.id === m.chain_id);
+              const canCancel = m.status === "open" && !m.joiner_wallet;
+              return (
+                <div key={m.id} className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="capitalize font-semibold">{m.game}</span>
+                    <span
+                      className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                        m.status === "live" ? "bg-success/15 text-success" : "bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {m.status}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Coins className="h-3 w-3 text-gold" /> {m.stake_amount} {m.token_symbol}
+                    <span className="mx-1">·</span>
+                    <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: ch?.color }} />
+                    {ch?.symbol}
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <Link
+                      to="/match/$id"
+                      params={{ id: m.id }}
+                      className="flex-1 text-center px-3 py-1.5 rounded-md border border-gold/40 text-gold hover:bg-gold/10 text-xs font-medium"
+                    >
+                      Open
+                    </Link>
+                    {canCancel && (
+                      <button
+                        onClick={() => cancelMatch(m.id)}
+                        className="px-3 py-1.5 rounded-md border border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-medium"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         {(["all", ...GAMES] as const).map((g) => (

@@ -6,7 +6,6 @@ import {
   Swords,
   Wallet,
   Users,
-  LineChart,
   ShieldCheck,
   UserCircle,
   Menu,
@@ -22,7 +21,6 @@ const NAV = [
   { to: "/lobby", label: "Lobby", icon: Swords },
   { to: "/wallet", label: "Wallet", icon: Wallet },
   { to: "/referrals", label: "Referrals", icon: Users },
-  { to: "/charts", label: "Charts", icon: LineChart },
   { to: "/anti-cheat", label: "Fair Play", icon: ShieldCheck },
   { to: "/profile", label: "Profile", icon: UserCircle },
 ] as const;

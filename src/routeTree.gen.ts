@@ -13,7 +13,6 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as ReferralsRouteImport } from './routes/referrals'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LobbyRouteImport } from './routes/lobby'
-import { Route as ChartsRouteImport } from './routes/charts'
 import { Route as AntiCheatRouteImport } from './routes/anti-cheat'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatchIdRouteImport } from './routes/match.$id'
@@ -37,11 +36,6 @@ const ProfileRoute = ProfileRouteImport.update({
 const LobbyRoute = LobbyRouteImport.update({
   id: '/lobby',
   path: '/lobby',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChartsRoute = ChartsRouteImport.update({
-  id: '/charts',
-  path: '/charts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AntiCheatRoute = AntiCheatRouteImport.update({
@@ -68,7 +62,6 @@ const GamesSlugRoute = GamesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anti-cheat': typeof AntiCheatRoute
-  '/charts': typeof ChartsRoute
   '/lobby': typeof LobbyRoute
   '/profile': typeof ProfileRoute
   '/referrals': typeof ReferralsRoute
@@ -79,7 +72,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anti-cheat': typeof AntiCheatRoute
-  '/charts': typeof ChartsRoute
   '/lobby': typeof LobbyRoute
   '/profile': typeof ProfileRoute
   '/referrals': typeof ReferralsRoute
@@ -91,7 +83,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/anti-cheat': typeof AntiCheatRoute
-  '/charts': typeof ChartsRoute
   '/lobby': typeof LobbyRoute
   '/profile': typeof ProfileRoute
   '/referrals': typeof ReferralsRoute
@@ -104,7 +95,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/anti-cheat'
-    | '/charts'
     | '/lobby'
     | '/profile'
     | '/referrals'
@@ -115,7 +105,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/anti-cheat'
-    | '/charts'
     | '/lobby'
     | '/profile'
     | '/referrals'
@@ -126,7 +115,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/anti-cheat'
-    | '/charts'
     | '/lobby'
     | '/profile'
     | '/referrals'
@@ -138,7 +126,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AntiCheatRoute: typeof AntiCheatRoute
-  ChartsRoute: typeof ChartsRoute
   LobbyRoute: typeof LobbyRoute
   ProfileRoute: typeof ProfileRoute
   ReferralsRoute: typeof ReferralsRoute
@@ -177,13 +164,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LobbyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/charts': {
-      id: '/charts'
-      path: '/charts'
-      fullPath: '/charts'
-      preLoaderRoute: typeof ChartsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/anti-cheat': {
       id: '/anti-cheat'
       path: '/anti-cheat'
@@ -218,7 +198,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AntiCheatRoute: AntiCheatRoute,
-  ChartsRoute: ChartsRoute,
   LobbyRoute: LobbyRoute,
   ProfileRoute: ProfileRoute,
   ReferralsRoute: ReferralsRoute,

@@ -154,7 +154,34 @@ function LobbyPage() {
     }
   };
 
+  const cancelMatch = async (id: string) => {
+    if (!address) return;
+    const ok = window.confirm("Cancel this hosted match? Joiners will no longer be able to join.");
+    if (!ok) return;
+    const { error } = await supabase
+      .from("matches")
+      .update({ status: "cancelled", ended_at: new Date().toISOString() })
+      .eq("id", id)
+      .ilike("host_wallet", address.toLowerCase())
+      .eq("status", "open");
+    if (error) {
+      toast.error(`Could not cancel: ${error.message}`);
+    } else {
+      toast.success("Match cancelled");
+      setMatches((prev) => prev.filter((m) => m.id !== id));
+    }
+  };
+
+  const myHosted = address
+    ? matches.filter(
+        (m) =>
+          m.host_wallet?.toLowerCase() === address.toLowerCase() &&
+          (m.status === "open" || m.status === "live"),
+      )
+    : [];
+
   const filtered = matches
+    .filter((m) => m.status === "open" || m.status === "live")
     .filter((m) => (filter === "all" ? true : m.game === filter))
     .filter((m) =>
       search

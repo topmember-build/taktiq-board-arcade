@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Wallet-first crypto dApp for Chess, Checkers, and Backgammon. Deposit MON or other testnet tokens and play for crypto on Monad and EVM testnets.",
+          "Wallet-first crypto dApp for Chess, Checkers, and Backgammon. Deposit Tokens or other testnet tokens and play for crypto on Monad and EVM testnets.",
       },
     ],
   }),
@@ -53,7 +53,7 @@ function HomePage() {
               <span className="text-gradient-gold">serious board gamers</span>.
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
-              Connect your wallet. Deposit MON or your favorite testnet token. Out-think your
+              Connect your wallet. Deposit Tokens or your favorite testnet token. Out-think your
               opponent on real, regulated board games - Chess, Checkers, and Backgammon - and let
               the smart contract pay the winner.
             </p>

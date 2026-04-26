@@ -10,12 +10,27 @@ import {
   findCctpChain,
   type CctpChain,
 } from "@/lib/cctp";
+import {
+  findSwapRoute,
+  buildExactInputSingleCalldata,
+  buildBalanceOfCalldata,
+} from "@/lib/swap";
 import { explorerTxUrl } from "@/lib/explorer";
-import { parseUnits } from "viem";
+import { parseUnits, parseEther, decodeAbiParameters } from "viem";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Step = "idle" | "approving" | "burning" | "waiting-attestation" | "minting" | "done" | "error";
+type Step =
+  | "idle"
+  | "swapping"
+  | "approving"
+  | "burning"
+  | "waiting-attestation"
+  | "minting"
+  | "done"
+  | "error";
+
+type SourceToken = "USDC" | "ETH";
 
 export function CctpBridge() {
   const { address, isConnected, chainId } = useAccount();

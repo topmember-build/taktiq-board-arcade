@@ -38,11 +38,13 @@ export function CctpBridge() {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
+  const [sourceToken, setSourceToken] = useState<SourceToken>("USDC");
   const [from, setFrom] = useState<CctpChain>(CCTP_CHAINS[0]);
   const [to, setTo] = useState<CctpChain>(CCTP_CHAINS[1]);
   const [amount, setAmount] = useState("1");
   const [recipient, setRecipient] = useState("");
   const [step, setStep] = useState<Step>("idle");
+  const [swapHash, setSwapHash] = useState<string | null>(null);
   const [burnHash, setBurnHash] = useState<string | null>(null);
   const [mintHash, setMintHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +60,7 @@ export function CctpBridge() {
 
   const reset = () => {
     setStep("idle");
+    setSwapHash(null);
     setBurnHash(null);
     setMintHash(null);
     setError(null);

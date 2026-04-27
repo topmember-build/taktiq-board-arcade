@@ -414,21 +414,25 @@ function LobbyPage() {
                     key={c.id}
                     onClick={() => setChainId(c.id)}
                     className={`relative px-2 py-2 rounded-lg border text-xs font-medium inline-flex items-center justify-center gap-1.5 ${
+                      c.primary ? "col-span-2 sm:col-span-1 ring-1 ring-gold/40" : ""
+                    } ${
                       chainId === c.id
                         ? "border-gold bg-gold/10 text-gold"
-                        : "border-border text-muted-foreground hover:border-gold/40"
+                        : c.primary
+                          ? "border-gold/50 bg-gold/5 text-gold/90 hover:bg-gold/10"
+                          : "border-border text-muted-foreground hover:border-gold/40"
                     }`}
                   >
                     <span
-                      className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-inner"
+                      className="inline-flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-inner whitespace-nowrap"
                       style={{ backgroundColor: c.color }}
                     >
                       {c.short}
                     </span>
                     <span className="truncate">{c.symbol}</span>
                     {c.primary && (
-                      <span className="absolute -top-1 -right-1 text-[8px] uppercase tracking-widest px-1 py-px rounded-full bg-gradient-gold text-primary-foreground font-bold">
-                        ★
+                      <span className="absolute -top-1.5 -right-1.5 text-[8px] uppercase tracking-widest px-1.5 py-px rounded-full bg-gradient-gold text-primary-foreground font-bold shadow-gold">
+                        ★ Arc
                       </span>
                     )}
                   </button>

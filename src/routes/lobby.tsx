@@ -405,22 +405,32 @@ function LobbyPage() {
               <label className="text-xs uppercase tracking-widest text-muted-foreground">
                 Network
               </label>
-              <div className="mt-2 grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Built for <span className="text-gold font-semibold">Arc Testnet</span> · other testnets supported.
+              </p>
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {SUPPORTED_CHAINS.map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setChainId(c.id)}
-                    className={`px-2 py-2 rounded-lg border text-xs font-medium ${
+                    className={`relative px-2 py-2 rounded-lg border text-xs font-medium inline-flex items-center justify-center gap-1.5 ${
                       chainId === c.id
                         ? "border-gold bg-gold/10 text-gold"
                         : "border-border text-muted-foreground hover:border-gold/40"
                     }`}
                   >
                     <span
-                      className="inline-block h-2 w-2 rounded-full mr-1"
+                      className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-inner"
                       style={{ backgroundColor: c.color }}
-                    />
-                    {c.symbol}
+                    >
+                      {c.short}
+                    </span>
+                    <span className="truncate">{c.symbol}</span>
+                    {c.primary && (
+                      <span className="absolute -top-1 -right-1 text-[8px] uppercase tracking-widest px-1 py-px rounded-full bg-gradient-gold text-primary-foreground font-bold">
+                        ★
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

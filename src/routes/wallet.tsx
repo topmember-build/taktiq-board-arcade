@@ -9,25 +9,23 @@ import {
   ExternalLink,
   Loader2,
   Copy,
-  ArrowRightLeft,
 } from "lucide-react";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { useEffect, useState } from "react";
 import { parseEther } from "viem";
 import { supabase } from "@/integrations/supabase/client";
 import { explorerTxUrl, explorerAddressUrl } from "@/lib/explorer";
-import { CctpBridge } from "@/components/CctpBridge";
 import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
-      { title: "Wallet - Deposit, Withdraw & Bridge - TaQtik" },
+      { title: "Wallet - Deposit & Withdraw - TaQtik" },
       {
         name: "description",
         content:
-          "Deposit, withdraw, and bridge testnet tokens. All transfers settle on-chain and are publicly verifiable.",
+          "Deposit and withdraw testnet tokens. All transfers settle on-chain and are publicly verifiable.",
       },
     ],
   }),
@@ -51,7 +49,7 @@ function WalletPage() {
   const { data: walletClient } = useWalletClient();
   const { switchChainAsync } = useSwitchChain();
   const publicClient = usePublicClient();
-  const [tab, setTab] = useState<"deposit" | "withdraw" | "bridge">("deposit");
+  const [tab, setTab] = useState<"deposit" | "withdraw">("deposit");
   const [amount, setAmount] = useState("");
   const [destination, setDestination] = useState("");
   const [chainId, setChainId] = useState(SUPPORTED_CHAINS[0].id);
@@ -206,7 +204,7 @@ function WalletPage() {
           <div className="mt-1 text-3xl font-bold text-gradient-gold">
             {balance ? `${Number(balance.formatted).toFixed(4)} ${balance.symbol}` : "-"}
           </div>
-          <div className="mt-6 grid grid-cols-3 gap-2">
+          <div className="mt-6 grid grid-cols-2 gap-2">
             <button
               onClick={() => setTab("deposit")}
               className={`p-3 rounded-lg border text-xs font-medium transition-smooth ${
@@ -223,43 +221,44 @@ function WalletPage() {
             >
               <ArrowUpFromLine className="h-4 w-4 mx-auto mb-1" /> Withdraw
             </button>
-            <button
-              onClick={() => setTab("bridge")}
-              className={`p-3 rounded-lg border text-xs font-medium transition-smooth ${
-                tab === "bridge" ? "border-gold bg-gold/10 text-gold" : "border-border text-muted-foreground"
-              }`}
-            >
-              <ArrowRightLeft className="h-4 w-4 mx-auto mb-1" /> Bridge
-            </button>
           </div>
         </div>
 
         {/* Form card */}
         <div className="lg:col-span-2 space-y-6">
-          {tab !== "bridge" ? (
-            <div className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant space-y-5">
+          <div className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant space-y-5">
               <h2 className="text-xl font-semibold capitalize">{tab} funds</h2>
 
               <div>
                 <label className="text-xs uppercase tracking-widest text-muted-foreground">
                   Network
                 </label>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Built for <span className="text-gold font-semibold">Arc Testnet</span> · other testnets supported.
+                </p>
                 <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {SUPPORTED_CHAINS.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => setChainId(c.id)}
-                      className={`px-3 py-2 rounded-lg border text-xs font-medium transition-smooth ${
+                      className={`relative px-3 py-2 rounded-lg border text-xs font-medium transition-smooth inline-flex items-center justify-center gap-1.5 ${
                         chainId === c.id
                           ? "border-gold bg-gold/10 text-gold"
                           : "border-border text-muted-foreground hover:border-gold/40"
                       }`}
                     >
                       <span
-                        className="inline-block h-2 w-2 rounded-full mr-1.5"
+                        className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[8px] font-bold text-white shadow-inner"
                         style={{ backgroundColor: c.color }}
-                      />
-                      {c.symbol}
+                      >
+                        {c.short}
+                      </span>
+                      <span>{c.symbol}</span>
+                      {c.primary && (
+                        <span className="absolute -top-1 -right-1 text-[8px] uppercase tracking-widest px-1 py-px rounded-full bg-gradient-gold text-primary-foreground font-bold">
+                          ★
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -349,9 +348,6 @@ function WalletPage() {
                 </span>
               </div>
             </div>
-          ) : (
-            <CctpBridge />
-          )}
         </div>
       </div>
 

@@ -14,6 +14,8 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle2,
+  Share2,
+  Copy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
@@ -525,6 +527,7 @@ function MatchRoomPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <ShareRoom matchId={match.id} />
           {match.status === "live" && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5 text-gold" /> Move clock {fmt(moveSecs)}
@@ -738,6 +741,55 @@ function MatchRoomPage() {
       </div>
 
       <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+    </div>
+  );
+}
+
+function ShareRoom({ matchId }: { matchId: string }) {
+  const [copied, setCopied] = useState<"code" | "link" | null>(null);
+  const code = matchId.slice(0, 8).toUpperCase();
+
+  const copy = async (kind: "code" | "link") => {
+    const value =
+      kind === "code"
+        ? code
+        : typeof window !== "undefined"
+          ? `${window.location.origin}/match/${matchId}`
+          : `/match/${matchId}`;
+    try {
+      if (kind === "link" && typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: "Join my TaQtik match", text: `Join my match · code ${code}`, url: value });
+      } else {
+        await navigator.clipboard.writeText(value);
+        toast.success(kind === "code" ? `Room code ${code} copied` : "Invite link copied");
+      }
+      setCopied(kind);
+      setTimeout(() => setCopied(null), 1800);
+    } catch {
+      // user cancelled share — silent
+    }
+  };
+
+  return (
+    <div className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/5 px-2 py-1 text-xs">
+      <span className="hidden sm:inline text-[10px] uppercase tracking-widest text-muted-foreground pl-1">
+        Room
+      </span>
+      <code className="font-mono font-semibold text-gold tracking-wider px-1">{code}</code>
+      <button
+        onClick={() => copy("code")}
+        title="Copy room code"
+        className="p-1 rounded-full hover:bg-gold/15 text-muted-foreground hover:text-gold transition-smooth"
+      >
+        {copied === "code" ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+      </button>
+      <button
+        onClick={() => copy("link")}
+        title="Share invite link"
+        className="p-1 rounded-full hover:bg-gold/15 text-muted-foreground hover:text-gold transition-smooth"
+      >
+        {copied === "link" ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <Share2 className="h-3.5 w-3.5" />}
+      </button>
     </div>
   );
 }

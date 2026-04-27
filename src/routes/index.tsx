@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Wallet-first crypto dApp for Chess, Checkers, and Backgammon. Deposit Tokens or other testnet tokens and play for crypto on Monad and EVM testnets.",
+          "Wallet-first crypto dApp built for Arc Testnet. Play Chess, Checkers and Backgammon for crypto on Arc, Monad and EVM testnets.",
       },
     ],
   }),

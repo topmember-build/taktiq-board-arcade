@@ -841,11 +841,19 @@ function ShareRoom({
   };
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/5 px-2 py-1 text-xs">
+    <div
+      className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/5 px-2 py-1 text-xs"
+      title={`Room code valid only on ${networkLabel}`}
+    >
       <span className="hidden sm:inline text-[10px] uppercase tracking-widest text-muted-foreground pl-1">
         Room
       </span>
       <code className="font-mono font-semibold text-gold tracking-wider px-1">{code}</code>
+      {chainShort && (
+        <span className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30">
+          {chainShort}
+        </span>
+      )}
       <button
         onClick={() => copy("code")}
         title="Copy room code"

@@ -187,6 +187,24 @@ function MatchRoomPage() {
   // Join match - locks stake on-chain (when escrow live) before flipping status
   const joinMatch = async () => {
     if (!address || !match) return;
+    // Chain validation: room code / invite link is only valid on the match's chain
+    if (connectedChainId !== match.chain_id) {
+      setConfirm({
+        status: "error",
+        title: "Wrong network",
+        message: `This room is hosted on ${chain?.name ?? `chain ${match.chain_id}`}. Switch your wallet to that network to join.`,
+        detail: `Connected: chain ${connectedChainId ?? "?"} · Required: ${chain?.name ?? match.chain_id}`,
+        onRetry: async () => {
+          try {
+            await switchChainAsync({ chainId: match.chain_id });
+            await joinMatch();
+          } catch (e: any) {
+            toast.error(e?.shortMessage ?? "Could not switch network");
+          }
+        },
+      });
+      return;
+    }
     if (!hostLocked) {
       setConfirm({
         status: "error",

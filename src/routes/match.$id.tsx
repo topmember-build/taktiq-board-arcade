@@ -547,7 +547,7 @@ function MatchRoomPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <ShareRoom matchId={match.id} />
+          <ShareRoom matchId={match.id} chainId={match.chain_id} chainName={chain?.name} chainShort={chain?.short} />
           {match.status === "live" && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5 text-gold" /> Move clock {fmt(moveSecs)}

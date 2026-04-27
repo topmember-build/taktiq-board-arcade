@@ -796,23 +796,42 @@ function MatchRoomPage() {
   );
 }
 
-function ShareRoom({ matchId }: { matchId: string }) {
+function ShareRoom({
+  matchId,
+  chainId,
+  chainName,
+  chainShort,
+}: {
+  matchId: string;
+  chainId: number;
+  chainName?: string;
+  chainShort?: string;
+}) {
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
   const code = matchId.slice(0, 8).toUpperCase();
+  const networkLabel = chainName ?? `chain ${chainId}`;
 
   const copy = async (kind: "code" | "link") => {
-    const value =
-      kind === "code"
-        ? code
-        : typeof window !== "undefined"
-          ? `${window.location.origin}/match/${matchId}`
-          : `/match/${matchId}`;
+    // Embed chain hint in the invite URL so joiners' wallets can prompt the right network
+    const linkUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/match/${matchId}?chain=${chainId}`
+        : `/match/${matchId}?chain=${chainId}`;
+    const value = kind === "code" ? `${code} · ${networkLabel}` : linkUrl;
     try {
       if (kind === "link" && typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "Join my TaQtik match", text: `Join my match · code ${code}`, url: value });
+        await navigator.share({
+          title: "Join my TaQtik match",
+          text: `Join my ${networkLabel} match · code ${code}`,
+          url: linkUrl,
+        });
       } else {
         await navigator.clipboard.writeText(value);
-        toast.success(kind === "code" ? `Room code ${code} copied` : "Invite link copied");
+        toast.success(
+          kind === "code"
+            ? `Room code ${code} copied (${networkLabel})`
+            : `Invite link copied (${networkLabel})`,
+        );
       }
       setCopied(kind);
       setTimeout(() => setCopied(null), 1800);

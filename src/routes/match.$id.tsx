@@ -14,6 +14,8 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle2,
+  Share2,
+  Copy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
@@ -525,6 +527,7 @@ function MatchRoomPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <ShareRoom matchId={match.id} />
           {match.status === "live" && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5 text-gold" /> Move clock {fmt(moveSecs)}

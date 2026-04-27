@@ -338,9 +338,6 @@ function WalletPage() {
                 </span>
               </div>
             </div>
-          ) : (
-            <CctpBridge />
-          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi";
 import { parseEther } from "viem";
 import {
   ArrowLeft,
@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Share2,
   Copy,
+  Network,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
@@ -77,7 +78,8 @@ type PendingMove = {
 
 function MatchRoomPage() {
   const { id } = Route.useParams();
-  const { address } = useAccount();
+  const { address, chainId: connectedChainId } = useAccount();
+  const { switchChainAsync, isPending: switchingChain } = useSwitchChain();
   const navigate = useNavigate();
   const [staking, setStaking] = useState(false);
   const [pendingTx, setPendingTx] = useState<`0x${string}` | undefined>();
@@ -185,6 +187,24 @@ function MatchRoomPage() {
   // Join match - locks stake on-chain (when escrow live) before flipping status
   const joinMatch = async () => {
     if (!address || !match) return;
+    // Chain validation: room code / invite link is only valid on the match's chain
+    if (connectedChainId !== match.chain_id) {
+      setConfirm({
+        status: "error",
+        title: "Wrong network",
+        message: `This room is hosted on ${chain?.name ?? `chain ${match.chain_id}`}. Switch your wallet to that network to join.`,
+        detail: `Connected: chain ${connectedChainId ?? "?"} · Required: ${chain?.name ?? match.chain_id}`,
+        onRetry: async () => {
+          try {
+            await switchChainAsync({ chainId: match.chain_id });
+            await joinMatch();
+          } catch (e: any) {
+            toast.error(e?.shortMessage ?? "Could not switch network");
+          }
+        },
+      });
+      return;
+    }
     if (!hostLocked) {
       setConfirm({
         status: "error",
@@ -527,7 +547,7 @@ function MatchRoomPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <ShareRoom matchId={match.id} />
+          <ShareRoom matchId={match.id} chainId={match.chain_id} chainName={chain?.name} chainShort={chain?.short} />
           {match.status === "live" && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5 text-gold" /> Move clock {fmt(moveSecs)}
@@ -607,8 +627,39 @@ function MatchRoomPage() {
               </button>
             )}
 
-            {/* Join (requires host lock) */}
-            {canJoin && (
+            {/* Chain mismatch warning — room code/invite link only valid on match's chain */}
+            {address && !isHost && connectedChainId !== match.chain_id && (
+              <div className="mt-5 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs space-y-2">
+                <div className="flex items-start gap-2">
+                  <Network className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-destructive">Wrong network</div>
+                    <div className="text-muted-foreground mt-0.5">
+                      This room is on <span className="text-foreground font-medium">{chain?.name ?? `chain ${match.chain_id}`}</span>.
+                      Switch your wallet to join.
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      await switchChainAsync({ chainId: match.chain_id });
+                      toast.success(`Switched to ${chain?.name ?? "match network"}`);
+                    } catch (e: any) {
+                      toast.error(e?.shortMessage ?? "Could not switch network");
+                    }
+                  }}
+                  disabled={switchingChain}
+                  className="w-full px-3 py-2 rounded-md bg-destructive/15 text-destructive hover:bg-destructive/25 inline-flex items-center justify-center gap-1 font-medium disabled:opacity-50"
+                >
+                  {switchingChain ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  Switch to {chain?.short ?? chain?.name ?? "network"}
+                </button>
+              </div>
+            )}
+
+            {/* Join (requires host lock + correct chain) */}
+            {canJoin && connectedChainId === match.chain_id && (
               <button
                 onClick={joinMatch}
                 disabled={staking}
@@ -622,7 +673,7 @@ function MatchRoomPage() {
             )}
 
             {/* Waiting for host to lock */}
-            {match.status === "open" && !isHost && address && !hostLocked && (
+            {match.status === "open" && !isHost && address && !hostLocked && connectedChainId === match.chain_id && (
               <div className="mt-5 p-3 rounded-lg border border-border/60 text-xs text-muted-foreground text-center">
                 Waiting for host to lock their stake before you can join.
               </div>
@@ -745,23 +796,42 @@ function MatchRoomPage() {
   );
 }
 
-function ShareRoom({ matchId }: { matchId: string }) {
+function ShareRoom({
+  matchId,
+  chainId,
+  chainName,
+  chainShort,
+}: {
+  matchId: string;
+  chainId: number;
+  chainName?: string;
+  chainShort?: string;
+}) {
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
   const code = matchId.slice(0, 8).toUpperCase();
+  const networkLabel = chainName ?? `chain ${chainId}`;
 
   const copy = async (kind: "code" | "link") => {
-    const value =
-      kind === "code"
-        ? code
-        : typeof window !== "undefined"
-          ? `${window.location.origin}/match/${matchId}`
-          : `/match/${matchId}`;
+    // Embed chain hint in the invite URL so joiners' wallets can prompt the right network
+    const linkUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/match/${matchId}?chain=${chainId}`
+        : `/match/${matchId}?chain=${chainId}`;
+    const value = kind === "code" ? `${code} · ${networkLabel}` : linkUrl;
     try {
       if (kind === "link" && typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "Join my TaQtik match", text: `Join my match · code ${code}`, url: value });
+        await navigator.share({
+          title: "Join my TaQtik match",
+          text: `Join my ${networkLabel} match · code ${code}`,
+          url: linkUrl,
+        });
       } else {
         await navigator.clipboard.writeText(value);
-        toast.success(kind === "code" ? `Room code ${code} copied` : "Invite link copied");
+        toast.success(
+          kind === "code"
+            ? `Room code ${code} copied (${networkLabel})`
+            : `Invite link copied (${networkLabel})`,
+        );
       }
       setCopied(kind);
       setTimeout(() => setCopied(null), 1800);
@@ -771,11 +841,19 @@ function ShareRoom({ matchId }: { matchId: string }) {
   };
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/5 px-2 py-1 text-xs">
+    <div
+      className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/5 px-2 py-1 text-xs"
+      title={`Room code valid only on ${networkLabel}`}
+    >
       <span className="hidden sm:inline text-[10px] uppercase tracking-widest text-muted-foreground pl-1">
         Room
       </span>
       <code className="font-mono font-semibold text-gold tracking-wider px-1">{code}</code>
+      {chainShort && (
+        <span className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30">
+          {chainShort}
+        </span>
+      )}
       <button
         onClick={() => copy("code")}
         title="Copy room code"

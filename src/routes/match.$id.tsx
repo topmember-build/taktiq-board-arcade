@@ -627,8 +627,39 @@ function MatchRoomPage() {
               </button>
             )}
 
-            {/* Join (requires host lock) */}
-            {canJoin && (
+            {/* Chain mismatch warning — room code/invite link only valid on match's chain */}
+            {address && !isHost && connectedChainId !== match.chain_id && (
+              <div className="mt-5 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs space-y-2">
+                <div className="flex items-start gap-2">
+                  <Network className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-destructive">Wrong network</div>
+                    <div className="text-muted-foreground mt-0.5">
+                      This room is on <span className="text-foreground font-medium">{chain?.name ?? `chain ${match.chain_id}`}</span>.
+                      Switch your wallet to join.
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      await switchChainAsync({ chainId: match.chain_id });
+                      toast.success(`Switched to ${chain?.name ?? "match network"}`);
+                    } catch (e: any) {
+                      toast.error(e?.shortMessage ?? "Could not switch network");
+                    }
+                  }}
+                  disabled={switchingChain}
+                  className="w-full px-3 py-2 rounded-md bg-destructive/15 text-destructive hover:bg-destructive/25 inline-flex items-center justify-center gap-1 font-medium disabled:opacity-50"
+                >
+                  {switchingChain ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  Switch to {chain?.short ?? chain?.name ?? "network"}
+                </button>
+              </div>
+            )}
+
+            {/* Join (requires host lock + correct chain) */}
+            {canJoin && connectedChainId === match.chain_id && (
               <button
                 onClick={joinMatch}
                 disabled={staking}
@@ -642,7 +673,7 @@ function MatchRoomPage() {
             )}
 
             {/* Waiting for host to lock */}
-            {match.status === "open" && !isHost && address && !hostLocked && (
+            {match.status === "open" && !isHost && address && !hostLocked && connectedChainId === match.chain_id && (
               <div className="mt-5 p-3 rounded-lg border border-border/60 text-xs text-muted-foreground text-center">
                 Waiting for host to lock their stake before you can join.
               </div>

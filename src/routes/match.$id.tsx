@@ -78,7 +78,8 @@ type PendingMove = {
 
 function MatchRoomPage() {
   const { id } = Route.useParams();
-  const { address } = useAccount();
+  const { address, chainId: connectedChainId } = useAccount();
+  const { switchChainAsync, isPending: switchingChain } = useSwitchChain();
   const navigate = useNavigate();
   const [staking, setStaking] = useState(false);
   const [pendingTx, setPendingTx] = useState<`0x${string}` | undefined>();

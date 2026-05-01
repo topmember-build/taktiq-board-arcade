@@ -47,9 +47,4 @@ export const SUPPORTED_CHAINS = [
   { id: arbitrumSepolia.id, name: "Arbitrum Sepolia", symbol: "ETH", color: "#28A0F0", short: "ARB" },
   { id: bscTestnet.id, name: "BSC Testnet", symbol: "tBNB", color: "#F0B90B", short: "BSC" },
 ];
-  { id: sepolia.id, name: "Ethereum Sepolia", symbol: "ETH", color: "#627EEA", short: "ETH" },
-  { id: baseSepolia.id, name: "Base Sepolia", symbol: "ETH", color: "#0052FF", short: "BASE" },
-  { id: arbitrumSepolia.id, name: "Arbitrum Sepolia", symbol: "ETH", color: "#28A0F0", short: "ARB" },
-  { id: bscTestnet.id, name: "BSC Testnet", symbol: "tBNB", color: "#F0B90B", short: "BSC" },
-];
 

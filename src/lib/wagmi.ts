@@ -34,7 +34,7 @@ export const arcTestnet = {
 
 export const wagmiConfig = getDefaultConfig({
   appName: "TaQtik",
-  projectId: "taqtik-arcade", // public WalletConnect project id placeholder
+  projectId: "e8c5b0234bd68d136688c3feac774014", // WalletConnect Cloud project id
   chains: [arcTestnet, monadTestnet, sepolia, baseSepolia, arbitrumSepolia, bscTestnet],
   ssr: false,
 });

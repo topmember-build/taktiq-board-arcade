@@ -406,7 +406,7 @@ function LobbyPage() {
                 Network
               </label>
               <p className="text-[10px] text-muted-foreground mt-1">
-                Built for <span className="text-gold font-semibold">Arc Testnet</span> · other testnets supported.
+                Built for <span className="text-gold font-semibold">Monad Testnet</span> · other testnets supported.
               </p>
               <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {SUPPORTED_CHAINS.map((c) => (
@@ -432,7 +432,7 @@ function LobbyPage() {
                     <span className="truncate">{c.symbol}</span>
                     {c.primary && (
                       <span className="absolute -top-1.5 -right-1.5 text-[8px] uppercase tracking-widest px-1.5 py-px rounded-full bg-gradient-gold text-primary-foreground font-bold shadow-gold">
-                        ★ Arc
+                        ★ Monad
                       </span>
                     )}
                   </button>

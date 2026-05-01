@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { explorerTxUrl, explorerAddressUrl } from "@/lib/explorer";
 import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
 import { NetworkGuard } from "@/components/NetworkGuard";
+import { NetworkDropdown } from "@/components/NetworkDropdown";
 import { usePreferredChain } from "@/hooks/usePreferredChain";
 import { toast } from "sonner";
 
@@ -240,35 +241,8 @@ function WalletPage() {
                 <p className="text-[10px] text-muted-foreground mt-1">
                   Built for <span className="text-gold font-semibold">Monad Testnet</span> · other testnets supported.
                 </p>
-                <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {SUPPORTED_CHAINS.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => setChainId(c.id)}
-                      className={`relative px-3 py-2 rounded-lg border text-xs font-medium transition-smooth inline-flex items-center justify-center gap-1.5 ${
-                        c.primary ? "col-span-2 sm:col-span-1 ring-1 ring-gold/40" : ""
-                      } ${
-                        chainId === c.id
-                          ? "border-gold bg-gold/10 text-gold"
-                          : c.primary
-                            ? "border-gold/50 bg-gold/5 text-gold/90 hover:bg-gold/10"
-                            : "border-border text-muted-foreground hover:border-gold/40"
-                      }`}
-                    >
-                      <span
-                        className="inline-flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-inner whitespace-nowrap"
-                        style={{ backgroundColor: c.color }}
-                      >
-                        {c.short}
-                      </span>
-                      <span className="whitespace-nowrap">{c.symbol}</span>
-                      {c.primary && (
-                        <span className="absolute -top-1.5 -right-1.5 text-[8px] uppercase tracking-widest px-1.5 py-px rounded-full bg-gradient-gold text-primary-foreground font-bold shadow-gold">
-                          ★ Monad
-                        </span>
-                      )}
-                    </button>
-                  ))}
+                <div className="mt-2">
+                  <NetworkDropdown value={chainId} onChange={setChainId} />
                 </div>
 
                 <label className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer select-none">

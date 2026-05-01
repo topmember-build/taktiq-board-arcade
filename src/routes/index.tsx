@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Wallet-first crypto dApp built for Arc Testnet. Play Chess, Checkers and Backgammon for crypto on Arc, Monad and EVM testnets.",
+          "Wallet-first crypto dApp built for Monad Testnet. Play Chess, Checkers and Backgammon for crypto on Monad, Arc and EVM testnets.",
       },
     ],
   }),

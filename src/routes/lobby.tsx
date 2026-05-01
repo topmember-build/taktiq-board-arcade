@@ -209,6 +209,8 @@ function LobbyPage() {
         </button>
       </div>
 
+      <NetworkGuard preferredChainId={chainId} />
+
       {/* My hosted matches */}
       {address && myHosted.length > 0 && (
         <div className="rounded-2xl border border-gold/30 bg-gradient-card p-5 shadow-gold space-y-3">

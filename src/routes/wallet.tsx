@@ -270,11 +270,8 @@ function WalletPage() {
                     </button>
                   ))}
                 </div>
-              </div>
 
-                </div>
-
-                <label className="flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer select-none">
+                <label className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={remember}

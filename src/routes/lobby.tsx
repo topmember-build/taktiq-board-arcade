@@ -2,10 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { Search, Plus, Users, Coins, Clock, X, Loader2 } from "lucide-react";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, monadTestnet } from "@/lib/wagmi";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
+import { NetworkGuard } from "@/components/NetworkGuard";
+import { usePreferredChain } from "@/hooks/usePreferredChain";
 
 export const Route = createFileRoute("/lobby")({
   head: () => ({
@@ -49,7 +51,7 @@ function LobbyPage() {
 
   // Form state
   const [game, setGame] = useState<GameSlug>("chess");
-  const [chainId, setChainId] = useState(SUPPORTED_CHAINS[0].id);
+  const { chainId, setChainId } = usePreferredChain();
   const [stake, setStake] = useState("1");
   const [timeCtrl, setTimeCtrl] = useState("5+0");
 
@@ -206,6 +208,8 @@ function LobbyPage() {
           <Plus className="h-4 w-4" /> Host a match
         </button>
       </div>
+
+      <NetworkGuard preferredChainId={chainId} />
 
       {/* My hosted matches */}
       {address && myHosted.length > 0 && (
@@ -406,7 +410,7 @@ function LobbyPage() {
                 Network
               </label>
               <p className="text-[10px] text-muted-foreground mt-1">
-                Built for <span className="text-gold font-semibold">Monad Testnet</span> · other testnets supported.
+                Built for <span className="text-gold font-semibold">Monad Testnet</span> · Arc and other testnets are optional.
               </p>
               <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {SUPPORTED_CHAINS.map((c) => (

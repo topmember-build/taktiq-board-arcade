@@ -10,12 +10,14 @@ import {
   Loader2,
   Copy,
 } from "lucide-react";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, monadTestnet } from "@/lib/wagmi";
 import { useEffect, useState } from "react";
 import { parseEther } from "viem";
 import { supabase } from "@/integrations/supabase/client";
 import { explorerTxUrl, explorerAddressUrl } from "@/lib/explorer";
 import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
+import { NetworkGuard } from "@/components/NetworkGuard";
+import { usePreferredChain } from "@/hooks/usePreferredChain";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/wallet")({
@@ -52,7 +54,7 @@ function WalletPage() {
   const [tab, setTab] = useState<"deposit" | "withdraw">("deposit");
   const [amount, setAmount] = useState("");
   const [destination, setDestination] = useState("");
-  const [chainId, setChainId] = useState(SUPPORTED_CHAINS[0].id);
+  const { chainId, setChainId, remember, setRemember } = usePreferredChain();
   const [submitting, setSubmitting] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmModalState | null>(null);
   const [history, setHistory] = useState<Tx[]>([]);
@@ -193,6 +195,8 @@ function WalletPage() {
         </p>
       </div>
 
+      <NetworkGuard preferredChainId={chainId} />
+
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Balance card */}
         <div className="lg:col-span-1 rounded-2xl border border-gold/30 bg-gradient-card p-6 shadow-gold">
@@ -266,6 +270,16 @@ function WalletPage() {
                     </button>
                   ))}
                 </div>
+
+                <label className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="h-3.5 w-3.5 accent-[var(--gold,gold)]"
+                  />
+                  Remember my last selected chain across sessions (defaults to Monad)
+                </label>
               </div>
 
               {tab === "deposit" ? (
@@ -274,6 +288,19 @@ function WalletPage() {
                     Send {chain.symbol} on <span className="font-medium text-foreground">{chain.name}</span>{" "}
                     to your connected wallet address below. Funds appear instantly after the network confirms.
                   </p>
+                  {chain.id === monadTestnet.id ? (
+                    <p className="text-xs text-gold/90">
+                      ★ Monad is the home network. Get free MON from the official faucet at{" "}
+                      <a href="https://faucet.monad.xyz" target="_blank" rel="noreferrer" className="underline">
+                        faucet.monad.xyz
+                      </a>
+                      .
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Optional testnet. For best UX and lowest fees, switch to Monad Testnet.
+                    </p>
+                  )}
                   <div className="rounded-lg border border-gold/30 bg-background/40 p-4 flex items-center gap-3">
                     <code className="flex-1 text-xs sm:text-sm font-mono break-all text-silver">{address}</code>
                     <button

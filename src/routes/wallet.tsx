@@ -195,6 +195,8 @@ function WalletPage() {
         </p>
       </div>
 
+      <NetworkGuard preferredChainId={chainId} />
+
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Balance card */}
         <div className="lg:col-span-1 rounded-2xl border border-gold/30 bg-gradient-card p-6 shadow-gold">
@@ -270,12 +272,38 @@ function WalletPage() {
                 </div>
               </div>
 
+                </div>
+
+                <label className="flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="h-3.5 w-3.5 accent-[var(--gold,gold)]"
+                  />
+                  Remember my last selected chain across sessions (defaults to Monad)
+                </label>
+              </div>
+
               {tab === "deposit" ? (
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground">
                     Send {chain.symbol} on <span className="font-medium text-foreground">{chain.name}</span>{" "}
                     to your connected wallet address below. Funds appear instantly after the network confirms.
                   </p>
+                  {chain.id === monadTestnet.id ? (
+                    <p className="text-xs text-gold/90">
+                      ★ Monad is the home network. Get free MON from the official faucet at{" "}
+                      <a href="https://faucet.monad.xyz" target="_blank" rel="noreferrer" className="underline">
+                        faucet.monad.xyz
+                      </a>
+                      .
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Optional testnet. For best UX and lowest fees, switch to Monad Testnet.
+                    </p>
+                  )}
                   <div className="rounded-lg border border-gold/30 bg-background/40 p-4 flex items-center gap-3">
                     <code className="flex-1 text-xs sm:text-sm font-mono break-all text-silver">{address}</code>
                     <button

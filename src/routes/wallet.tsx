@@ -10,12 +10,14 @@ import {
   Loader2,
   Copy,
 } from "lucide-react";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, monadTestnet } from "@/lib/wagmi";
 import { useEffect, useState } from "react";
 import { parseEther } from "viem";
 import { supabase } from "@/integrations/supabase/client";
 import { explorerTxUrl, explorerAddressUrl } from "@/lib/explorer";
 import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal";
+import { NetworkGuard } from "@/components/NetworkGuard";
+import { usePreferredChain } from "@/hooks/usePreferredChain";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/wallet")({
@@ -52,7 +54,7 @@ function WalletPage() {
   const [tab, setTab] = useState<"deposit" | "withdraw">("deposit");
   const [amount, setAmount] = useState("");
   const [destination, setDestination] = useState("");
-  const [chainId, setChainId] = useState(SUPPORTED_CHAINS[0].id);
+  const { chainId, setChainId, remember, setRemember } = usePreferredChain();
   const [submitting, setSubmitting] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmModalState | null>(null);
   const [history, setHistory] = useState<Tx[]>([]);

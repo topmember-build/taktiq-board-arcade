@@ -214,7 +214,7 @@ function LobbyPage() {
 
       {/* My hosted matches */}
       {address && myHosted.length > 0 && (
-        <div className="rounded-2xl border border-gold/30 bg-gradient-card p-5 shadow-gold space-y-3">
+        <div className="rounded-2xl glass holo-border p-5 shadow-iris space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gradient-gold uppercase tracking-widest">
               Your hosted matches
@@ -226,7 +226,7 @@ function LobbyPage() {
               const ch = SUPPORTED_CHAINS.find((c) => c.id === m.chain_id);
               const canCancel = m.status === "open" && !m.joiner_wallet;
               return (
-                <div key={m.id} className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm">
+                <div key={m.id} className="rounded-xl glass border-white/10 p-4 text-sm transition-smooth hover:ring-1 hover:ring-gold/40">
                   <div className="flex items-center justify-between">
                     <span className="capitalize font-semibold">{m.game}</span>
                     <span
@@ -293,7 +293,7 @@ function LobbyPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-border/60 bg-gradient-card">
+        <div className="text-center py-20 rounded-2xl glass holo-border">
           <p className="text-muted-foreground">No matches yet - be the first to host one.</p>
           <button
             onClick={() => setHostOpen(true)}
@@ -310,7 +310,7 @@ function LobbyPage() {
             return (
               <div
                 key={m.id}
-                className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-elegant hover:border-gold/40 transition-smooth"
+                className="group rounded-2xl glass holo-border p-5 shadow-elegant hover:shadow-iris transition-smooth"
               >
                 <div className="flex items-center justify-between">
                   <span className="capitalize text-sm font-semibold text-gradient-gold">
@@ -339,12 +339,17 @@ function LobbyPage() {
                     <Clock className="h-3 w-3" /> {m.time_control ?? "Standard"}
                   </div>
                 </div>
-                <div className="mt-3 text-[10px] text-muted-foreground">
+                <div className="mt-3 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full glass border-white/10 text-[10px] uppercase tracking-widest font-semibold">
                   <span
-                    className="inline-block h-1.5 w-1.5 rounded-full mr-1.5"
-                    style={{ backgroundColor: chain?.color }}
-                  />
-                  {chain?.name ?? `Chain ${m.chain_id}`}
+                    className="inline-flex h-4 min-w-[1.5rem] px-1 items-center justify-center rounded-full text-[8px] text-white"
+                    style={{
+                      backgroundColor: chain?.color ?? "#9ca3af",
+                      boxShadow: `0 0 10px ${chain?.color ?? "#9ca3af"}55`,
+                    }}
+                  >
+                    {chain?.symbol ?? "?"}
+                  </span>
+                  <span className="text-muted-foreground">{chain?.name ?? `Chain ${m.chain_id}`}</span>
                 </div>
                 <Link
                   to="/match/$id"

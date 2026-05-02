@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import logo from "@/assets/taqtik-logo.jpg";
 import { AmbientPlayer } from "./AmbientPlayer";
+import { NetworkBadge } from "./NetworkBadge";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -73,6 +74,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2">
+            <NetworkBadge />
             <AmbientPlayer />
             <div className="hidden sm:block">
               <ConnectButton

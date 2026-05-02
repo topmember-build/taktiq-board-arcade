@@ -569,7 +569,7 @@ function MatchRoomPage() {
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <div className="rounded-2xl border border-border/60 bg-gradient-card p-4 sm:p-6 shadow-elegant">
+          <div className="rounded-2xl glass border-white/10 p-4 sm:p-6 shadow-elegant">
             {renderBoard()}
           </div>
 
@@ -600,7 +600,7 @@ function MatchRoomPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-gold/30 bg-gradient-card p-5 shadow-gold">
+          <div className="rounded-2xl glass holo-border p-5 shadow-iris">
             <div className="text-xs uppercase tracking-widest text-muted-foreground">
               Current pot
             </div>
@@ -748,7 +748,7 @@ function MatchRoomPage() {
             )}
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 space-y-3 text-sm">
+          <div className="rounded-2xl glass border-white/10 p-5 space-y-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-4 w-4" /> Host

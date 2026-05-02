@@ -293,7 +293,7 @@ function LobbyPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-border/60 bg-gradient-card">
+        <div className="text-center py-20 rounded-2xl glass holo-border">
           <p className="text-muted-foreground">No matches yet - be the first to host one.</p>
           <button
             onClick={() => setHostOpen(true)}
@@ -310,7 +310,7 @@ function LobbyPage() {
             return (
               <div
                 key={m.id}
-                className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-elegant hover:border-gold/40 transition-smooth"
+                className="group rounded-2xl glass holo-border p-5 shadow-elegant hover:shadow-iris transition-smooth"
               >
                 <div className="flex items-center justify-between">
                   <span className="capitalize text-sm font-semibold text-gradient-gold">

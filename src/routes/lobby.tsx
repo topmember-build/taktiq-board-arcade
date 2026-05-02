@@ -214,7 +214,7 @@ function LobbyPage() {
 
       {/* My hosted matches */}
       {address && myHosted.length > 0 && (
-        <div className="rounded-2xl border border-gold/30 bg-gradient-card p-5 shadow-gold space-y-3">
+        <div className="rounded-2xl glass holo-border p-5 shadow-iris space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gradient-gold uppercase tracking-widest">
               Your hosted matches
@@ -226,7 +226,8 @@ function LobbyPage() {
               const ch = SUPPORTED_CHAINS.find((c) => c.id === m.chain_id);
               const canCancel = m.status === "open" && !m.joiner_wallet;
               return (
-                <div key={m.id} className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm">
+                <div key={m.id} className="rounded-xl glass border-white/10 p-4 text-sm transition-smooth hover:ring-1 hover:ring-gold/40">
+                  {(() => { void ch; return null; })()}
                   <div className="flex items-center justify-between">
                     <span className="capitalize font-semibold">{m.game}</span>
                     <span

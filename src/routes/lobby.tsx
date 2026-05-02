@@ -227,7 +227,6 @@ function LobbyPage() {
               const canCancel = m.status === "open" && !m.joiner_wallet;
               return (
                 <div key={m.id} className="rounded-xl glass border-white/10 p-4 text-sm transition-smooth hover:ring-1 hover:ring-gold/40">
-                  {(() => { void ch; return null; })()}
                   <div className="flex items-center justify-between">
                     <span className="capitalize font-semibold">{m.game}</span>
                     <span

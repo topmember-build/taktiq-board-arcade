@@ -41,16 +41,18 @@ function HomePage() {
   return (
     <div className="space-y-16">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-card shadow-elegant">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,oklch(0.82_0.16_88/0.18),transparent_60%)]" />
+      <section className="relative overflow-hidden rounded-3xl glass-strong holo-border shadow-elegant animate-fade-in">
+        <div className="absolute inset-0 hud-grid opacity-30" />
+        <div className="absolute -top-32 -right-20 h-96 w-96 rounded-full bg-iris/30 blur-3xl animate-float" />
+        <div className="absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-cyan-glow/20 blur-3xl" />
         <div className="relative grid lg:grid-cols-2 gap-8 p-8 sm:p-12 lg:p-16 items-center">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-xs text-gold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border-gold/30 text-xs text-gold animate-pulse-glow">
               <Sparkles className="h-3 w-3" /> Open beta · On Testnet live
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">
               The crypto arcade for{" "}
-              <span className="text-gradient-gold">serious board gamers</span>.
+              <span className="text-gradient-iris">serious board gamers</span>.
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
               Connect your wallet. Deposit Tokens or your favorite testnet token. Out-think your
@@ -62,7 +64,7 @@ function HomePage() {
                 {({ account, openConnectModal, openAccountModal, mounted }) => (
                   <button
                     onClick={account ? openAccountModal : openConnectModal}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-gold text-primary-foreground font-semibold shadow-gold hover:opacity-90 transition-smooth"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-gold text-primary-foreground font-semibold shadow-gold hover:opacity-90 hover:scale-[1.02] transition-smooth"
                     suppressHydrationWarning
                   >
                     <Wallet className="h-4 w-4" />
@@ -74,7 +76,7 @@ function HomePage() {
               </ConnectButton.Custom>
               <Link
                 to="/lobby"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-silver/40 text-silver hover:bg-silver/10 transition-smooth font-medium"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl glass text-foreground hover:text-gold transition-smooth font-medium"
               >
                 Browse lobby <ArrowRight className="h-4 w-4" />
               </Link>
@@ -89,12 +91,14 @@ function HomePage() {
             </div>
           </div>
           <div className="relative grid place-items-center">
-            <div className="absolute inset-0 bg-gradient-gold opacity-20 blur-3xl rounded-full" />
-            <img
-              src={logo}
-              alt="TaQtik shield logo with chess and casino motifs"
-              className="relative w-64 sm:w-80 rounded-2xl shadow-glow animate-float"
-            />
+            <div className="absolute inset-0 bg-gradient-iris opacity-30 blur-3xl rounded-full" />
+            <div className="relative holo-border rounded-3xl p-1.5 animate-float">
+              <img
+                src={logo}
+                alt="TaQtik shield logo with chess and casino motifs"
+                className="w-64 sm:w-80 rounded-2xl shadow-glow"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -144,17 +148,18 @@ function HomePage() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {GAMES.map((g) => (
+          {GAMES.map((g, i) => (
             <Link
               key={g.slug}
               to="/games/$slug"
               params={{ slug: g.slug }}
-              className="group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant hover:shadow-gold hover:border-gold/40 transition-smooth"
+              className="group relative overflow-hidden rounded-2xl glass holo-border p-6 transition-smooth hover:-translate-y-1 hover:shadow-iris animate-fade-in"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-gold/10 blur-2xl group-hover:bg-gold/20 transition-smooth" />
+              <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-gradient-iris opacity-20 blur-2xl group-hover:opacity-40 transition-smooth" />
               <div className="relative">
-                <div className="text-xs uppercase tracking-widest text-gold/80">{g.tagline}</div>
-                <div className="mt-2 text-2xl font-bold">{g.name}</div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-gold/80">{g.tagline}</div>
+                <div className="mt-2 text-2xl font-bold text-gradient-silver">{g.name}</div>
                 <div className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-silver group-hover:text-gold transition-smooth">
                   Enter lobby <ArrowRight className="h-3 w-3" />
                 </div>
@@ -182,12 +187,13 @@ function HomePage() {
             title: "Earn from referrals",
             text: "Share your code and earn a share of every wager your friends make - paid out automatically per match.",
           },
-        ].map((f) => (
+        ].map((f, i) => (
           <div
             key={f.title}
-            className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant"
+            className="rounded-2xl glass holo-border p-6 transition-smooth hover:-translate-y-0.5 animate-fade-in"
+            style={{ animationDelay: `${i * 80}ms` }}
           >
-            <div className="h-10 w-10 rounded-lg bg-gold/10 text-gold grid place-items-center">
+            <div className="h-10 w-10 rounded-xl bg-gradient-iris/20 text-gold grid place-items-center ring-1 ring-gold/30">
               <f.icon className="h-5 w-5" />
             </div>
             <h3 className="mt-4 font-semibold text-lg">{f.title}</h3>

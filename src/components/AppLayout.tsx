@@ -30,16 +30,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-border/60 backdrop-blur-xl bg-background/70">
+      <header className="sticky top-0 z-40 glass-strong border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <img
-              src={logo}
-              alt="TaQtik logo"
-              className="h-9 w-9 rounded-md object-cover ring-1 ring-gold/40 group-hover:ring-gold transition-smooth"
-            />
+            <div className="relative h-9 w-9 rounded-xl holo-border animate-pulse-glow">
+              <img
+                src={logo}
+                alt="TaQtik logo"
+                className="h-9 w-9 rounded-xl object-cover transition-smooth"
+              />
+            </div>
             <div className="leading-none">
               <div className="text-lg font-bold tracking-wider text-gradient-gold">TaQtik</div>
               <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
@@ -57,10 +59,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   key={to}
                   to={to}
                   className={cn(
-                    "px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-smooth",
+                    "relative px-3 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-smooth",
                     active
-                      ? "bg-secondary text-gold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                      ? "text-gold glass ring-1 ring-gold/30 shadow-gold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/5",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -91,7 +93,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="lg:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl">
+          <div className="lg:hidden border-t border-white/10 glass-strong">
             <nav className="px-4 py-3 grid grid-cols-2 gap-1">
               {NAV.map(({ to, label, icon: Icon }) => {
                 const active = location.pathname === to;
@@ -122,7 +124,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-10">{children}</main>
 
-      <footer className="border-t border-border/60 mt-12 py-8 text-center text-xs text-muted-foreground">
+      <footer className="border-t border-white/10 mt-12 py-8 text-center text-xs text-muted-foreground glass-strong">
         <p suppressHydrationWarning>
           © {new Date().getFullYear()} TaQtik · Testnet only · Play responsibly · Compliant with
           regulated board game rule sets (FIDE, WCDF, WBF, Hasbro, Mattel).

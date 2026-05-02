@@ -339,12 +339,17 @@ function LobbyPage() {
                     <Clock className="h-3 w-3" /> {m.time_control ?? "Standard"}
                   </div>
                 </div>
-                <div className="mt-3 text-[10px] text-muted-foreground">
+                <div className="mt-3 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full glass border-white/10 text-[10px] uppercase tracking-widest font-semibold">
                   <span
-                    className="inline-block h-1.5 w-1.5 rounded-full mr-1.5"
-                    style={{ backgroundColor: chain?.color }}
-                  />
-                  {chain?.name ?? `Chain ${m.chain_id}`}
+                    className="inline-flex h-4 min-w-[1.5rem] px-1 items-center justify-center rounded-full text-[8px] text-white"
+                    style={{
+                      backgroundColor: chain?.color ?? "#9ca3af",
+                      boxShadow: `0 0 10px ${chain?.color ?? "#9ca3af"}55`,
+                    }}
+                  >
+                    {chain?.symbol ?? "?"}
+                  </span>
+                  <span className="text-muted-foreground">{chain?.name ?? `Chain ${m.chain_id}`}</span>
                 </div>
                 <Link
                   to="/match/$id"

@@ -30,7 +30,7 @@ export function NetworkDropdown({
   return (
     <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
       <SelectTrigger
-        className={`h-auto py-2.5 bg-input/40 border-border hover:border-gold/40 transition-smooth ${className ?? ""}`}
+        className={`h-auto py-2.5 glass border-white/10 hover:border-gold/40 transition-smooth rounded-xl ${className ?? ""}`}
       >
         <SelectValue>
           <div className="flex items-center gap-2 text-left">
@@ -49,7 +49,7 @@ export function NetworkDropdown({
           </div>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="max-h-[60vh]">
+      <SelectContent className="max-h-[60vh] glass-strong border-white/10">
         {SUPPORTED_CHAINS.map((c) => (
           <SelectItem key={c.id} value={String(c.id)} className="py-2.5">
             <div className="flex items-start gap-2.5">

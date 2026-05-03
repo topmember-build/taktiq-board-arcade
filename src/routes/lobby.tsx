@@ -115,6 +115,21 @@ function LobbyPage() {
       return;
     }
     setCreating(true);
+    // Anti-cheat: evaluate bet pattern before creating
+    const guard = await evaluateBetPattern(address, amount, null);
+    if (guard.action === "block") {
+      setCreating(false);
+      setConfirm({
+        status: "error",
+        title: "Match blocked by fair-play guard",
+        message: "This action was flagged by the anti-cheat system.",
+        detail: guard.reasons.join(" · "),
+      });
+      return;
+    }
+    if (guard.action === "flag") {
+      toast.warning(`Flagged for review: ${guard.reasons.join(", ")}`);
+    }
     setConfirm({
       status: "pending",
       title: "Creating match…",

@@ -217,6 +217,25 @@ function MatchRoomPage() {
       return;
     }
     setStaking(true);
+    // Anti-cheat: bet-pattern guard before joining
+    const guard = await evaluateBetPattern(
+      address,
+      Number(match.stake_amount),
+      match.host_wallet,
+    );
+    if (guard.action === "block") {
+      setStaking(false);
+      setConfirm({
+        status: "error",
+        title: "Join blocked by fair-play guard",
+        message: "This action was flagged by the anti-cheat system.",
+        detail: guard.reasons.join(" · "),
+      });
+      return;
+    }
+    if (guard.action === "flag") {
+      toast.warning(`Flagged for review: ${guard.reasons.join(", ")}`);
+    }
     setConfirm({
       status: "pending",
       title: "Joining match…",

@@ -33,6 +33,7 @@ import { initialMonopoly } from "@/lib/games/monopoly";
 import { initialScrabble } from "@/lib/games/scrabble";
 import { Chess } from "chess.js";
 import { toast } from "sonner";
+import { evaluateBetPattern } from "@/lib/betPatternGuard";
 import { useMatchSync } from "@/hooks/useMatchSync";
 import { useEscrowVerifier } from "@/hooks/useEscrowVerifier";
 import { useAntiCheat } from "@/hooks/useAntiCheat";

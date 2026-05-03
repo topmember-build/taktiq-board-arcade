@@ -9,6 +9,7 @@ import { ConfirmModal, type ConfirmModalState } from "@/components/ConfirmModal"
 import { NetworkGuard } from "@/components/NetworkGuard";
 import { NetworkDropdown } from "@/components/NetworkDropdown";
 import { usePreferredChain } from "@/hooks/usePreferredChain";
+import { evaluateBetPattern } from "@/lib/betPatternGuard";
 
 export const Route = createFileRoute("/lobby")({
   head: () => ({

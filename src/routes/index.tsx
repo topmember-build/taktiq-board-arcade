@@ -76,7 +76,7 @@ function HomePage() {
               </ConnectButton.Custom>
               <Link
                 to="/lobby"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl glass text-foreground hover:text-gold transition-smooth font-medium"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-smooth font-semibold"
               >
                 Browse lobby <ArrowRight className="h-4 w-4" />
               </Link>

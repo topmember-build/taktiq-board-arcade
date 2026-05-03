@@ -47,7 +47,7 @@ function HomePage() {
         <div className="absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-cyan-glow/20 blur-3xl" />
         <div className="relative grid lg:grid-cols-2 gap-8 p-8 sm:p-12 lg:p-16 items-center">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border-gold/30 text-xs text-gold animate-pulse-glow">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-gold text-primary-foreground border border-gold/40 text-xs font-semibold animate-pulse-glow">
               <Sparkles className="h-3 w-3" /> Open beta · On Testnet live
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">

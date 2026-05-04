@@ -14,6 +14,7 @@ import {
 import logo from "@/assets/taqtik-logo.jpg";
 import { AmbientPlayer } from "./AmbientPlayer";
 import { NetworkBadge } from "./NetworkBadge";
+import { HighContrastToggle } from "./HighContrastToggle";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -75,6 +76,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-2">
             <NetworkBadge />
+            <HighContrastToggle />
             <AmbientPlayer />
             <div className="hidden sm:block">
               <ConnectButton

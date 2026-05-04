@@ -15,6 +15,7 @@ import logo from "@/assets/taqtik-logo.jpg";
 import { AmbientPlayer } from "./AmbientPlayer";
 import { NetworkBadge } from "./NetworkBadge";
 import { HighContrastToggle } from "./HighContrastToggle";
+import { GoogleAuthButton } from "./GoogleAuthButton";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -78,6 +79,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <NetworkBadge />
             <HighContrastToggle />
             <AmbientPlayer />
+            <GoogleAuthButton />
             <div className="hidden sm:block">
               <ConnectButton
                 accountStatus={{ smallScreen: "avatar", largeScreen: "full" }}

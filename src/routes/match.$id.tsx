@@ -370,15 +370,16 @@ function MatchRoomPage() {
           .update(updates as any)
           .eq("id", match.id);
         if (error) throw error;
-        const { error: moveErr } = await supabase.from("match_moves").insert({
-          match_id: match.id,
-          ply: 0,
-          wallet_address: address,
-          move: m.move as any,
-          state: m.nextState as any,
-          result: m.result,
+        await submitMatchMove({
+          data: {
+            matchId: match.id,
+            walletAddress: address,
+            ply: 0,
+            move: m.move,
+            state: m.nextState,
+            result: m.result,
+          },
         });
-        if (moveErr) throw moveErr;
         if (m.result) {
           toast.success(`Game over - ${m.result}`);
           setConfirm({

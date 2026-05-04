@@ -47,7 +47,7 @@ function HomePage() {
         <div className="absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-cyan-glow/20 blur-3xl" />
         <div className="relative grid lg:grid-cols-2 gap-8 p-8 sm:p-12 lg:p-16 items-center">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-gold text-primary-foreground border border-gold/40 text-xs font-semibold animate-pulse-glow">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full cta-dark text-xs animate-pulse-glow">
               <Sparkles className="h-3 w-3" /> Open beta · On Testnet live
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">
@@ -64,7 +64,7 @@ function HomePage() {
                 {({ account, openConnectModal, openAccountModal, mounted }) => (
                   <button
                     onClick={account ? openAccountModal : openConnectModal}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-gold text-primary-foreground font-semibold shadow-gold hover:opacity-90 hover:scale-[1.02] transition-smooth"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl cta-dark shadow-gold hover:scale-[1.02] transition-smooth text-sm sm:text-base"
                     suppressHydrationWarning
                   >
                     <Wallet className="h-4 w-4" />
@@ -76,7 +76,7 @@ function HomePage() {
               </ConnectButton.Custom>
               <Link
                 to="/lobby"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-smooth font-semibold"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl cta-dark-solid transition-smooth text-sm sm:text-base"
               >
                 Browse lobby <ArrowRight className="h-4 w-4" />
               </Link>

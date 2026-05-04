@@ -205,6 +205,45 @@
     color: transparent;
   }
   .bg-gradient-gold { background: var(--gradient-gold); }
+
+  /* Shared dark-contrast CTA: black/near-black text on solid light surface.
+     Used by primary buttons and badges so they stay readable on every screen
+     size and against any holographic backdrop. */
+  .cta-dark {
+    color: var(--primary-foreground);
+    background: var(--gradient-gold);
+    border: 1px solid oklch(0.13 0.01 260 / 0.35);
+    font-weight: 700;
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.25);
+  }
+  .cta-dark:hover { filter: brightness(1.05); }
+  .cta-dark-solid {
+    color: var(--background);
+    background: var(--foreground);
+    border: 1px solid var(--foreground);
+    font-weight: 700;
+  }
+  .cta-dark-solid:hover { filter: brightness(0.95); }
+
+  /* High-contrast accessibility mode — overrides badges & CTAs to maximum
+     contrast: solid white backgrounds, pure black text, thick black borders. */
+  :root.high-contrast .cta-dark,
+  :root.high-contrast .cta-dark-solid,
+  :root.high-contrast .bg-gradient-gold {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    text-shadow: none !important;
+    box-shadow: 0 0 0 2px #ffffff inset !important;
+  }
+  :root.high-contrast .text-gradient-gold,
+  :root.high-contrast .text-gradient-silver,
+  :root.high-contrast .text-gradient-iris {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+            background-clip: initial !important;
+    color: var(--foreground) !important;
+  }
   .bg-gradient-iris { background: var(--gradient-iris); }
   .bg-gradient-card {
     background: var(--gradient-card);

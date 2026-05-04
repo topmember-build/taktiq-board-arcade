@@ -220,7 +220,7 @@ function LobbyPage() {
         </div>
         <button
           onClick={() => setHostOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-gold text-primary-foreground font-semibold shadow-gold hover:opacity-90 transition-smooth self-start"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg cta-dark shadow-gold transition-smooth self-start text-sm sm:text-base"
         >
           <Plus className="h-4 w-4" /> Host a match
         </button>
@@ -290,7 +290,7 @@ function LobbyPage() {
             onClick={() => setFilter(g)}
             className={`px-4 py-2 rounded-full text-sm font-medium capitalize transition-smooth ${
               filter === g
-                ? "bg-gradient-gold text-primary-foreground"
+                ? "cta-dark"
                 : "border border-border text-muted-foreground hover:text-foreground hover:border-gold/40"
             }`}
           >

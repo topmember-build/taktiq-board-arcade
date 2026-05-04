@@ -79,6 +79,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <NetworkBadge />
             <HighContrastToggle />
             <AmbientPlayer />
+            <GoogleAuthButton />
             <div className="hidden sm:block">
               <ConnectButton
                 accountStatus={{ smallScreen: "avatar", largeScreen: "full" }}

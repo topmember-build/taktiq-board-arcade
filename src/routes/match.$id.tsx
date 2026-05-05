@@ -19,7 +19,7 @@ import {
   Network,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { submitMatchMove } from "@/server/matchMoves.functions";
+import { submitMatchMove } from "@/server/matchMoves.functions.server";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import { ESCROW_ABI, ESCROW_ADDRESS, isEscrowDeployed, matchIdToBytes32 } from "@/lib/escrow";
 import { ChessBoard } from "@/components/games/ChessBoard";

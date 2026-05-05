@@ -95,7 +95,7 @@ export const submitMatchMove = createServerFn({ method: "POST" })
 
     const { error: updErr } = await supabaseAdmin
       .from("matches")
-      .update(updates)
+      .update(updates as any)
       .eq("id", matchId);
     if (updErr) throw new Error(updErr.message);
 

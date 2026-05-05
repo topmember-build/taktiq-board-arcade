@@ -3,7 +3,7 @@ import { LogIn, LogOut, Link2, Link2Off, Loader2, CheckCircle2 } from "lucide-re
 import { useAccount } from "wagmi";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
-import { linkGoogleToWallet, getWalletLinkStatus } from "@/server/identity.functions";
+import { linkGoogleToWallet, getWalletLinkStatus } from "@/lib/identity.server";
 import { toast } from "sonner";
 
 /**

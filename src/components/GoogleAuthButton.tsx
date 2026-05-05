@@ -75,7 +75,12 @@ export function GoogleAuthButton() {
     }
     setLinking(true);
     try {
-      await linkGoogleToWallet({ data: { walletAddress: address } });
+      const { data: sess } = await supabase.auth.getSession();
+      const accessToken = sess.session?.access_token;
+      if (!accessToken) throw new Error("No active Google session");
+      await linkGoogleToWallet({
+        data: { walletAddress: address, accessToken },
+      });
       setLinked(true);
       toast.success("Wallet linked to Google ✓");
     } catch (e: any) {

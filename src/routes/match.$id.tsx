@@ -349,38 +349,32 @@ function MatchRoomPage() {
     }
   };
 
-  // Try to flush the pending move to Supabase. Returns true on success.
+  // Try to flush the pending move via the server-authoritative endpoint.
+  // RLS blocks direct client inserts on match_moves; submitMatchMove uses
+  // the service role after validating turn, ply, and player identity.
   const flushMove = useCallback(
     async (m: PendingMove) => {
       if (!match || !address) return false;
       setSubmitting(true);
       try {
-        const nextTurn =
-          match.turn_wallet === match.host_wallet ? match.joiner_wallet : match.host_wallet;
-        const updates: Partial<MatchRow> = {
-          current_state: m.nextState as any,
-          turn_wallet: nextTurn,
-          updated_at: new Date().toISOString(),
-        };
-        if (m.result) {
-          updates.status = "ended";
-          updates.winner = address;
-        }
-        const { error } = await supabase
-          .from("matches")
-          .update(updates as any)
-          .eq("id", match.id);
-        if (error) throw error;
-        await submitMatchMove({
+        // Authoritative ply count from the server's view of history
+        const { count, error: countErr } = await supabase
+          .from("match_moves")
+          .select("id", { count: "exact", head: true })
+          .eq("match_id", match.id);
+        if (countErr) throw countErr;
+
+        const res = await submitMatchMove({
           data: {
             matchId: match.id,
             walletAddress: address,
-            ply: 0,
+            expectedPly: count ?? 0,
             move: m.move,
-            state: m.nextState,
+            nextState: m.nextState,
             result: m.result,
           },
         });
+        if (!res?.ok) throw new Error("Server rejected move");
         if (m.result) {
           toast.success(`Game over - ${m.result}`);
           setConfirm({
@@ -394,12 +388,22 @@ function MatchRoomPage() {
         setPendingMove(null);
         return true;
       } catch (e: any) {
-        const msg = e?.message ?? "Network error";
+        const raw = e?.message ?? "Network error";
+        // Detect RLS denial (server-side WITH CHECK false) and surface a
+        // clear, user-friendly message instead of a cryptic 42501 / "new
+        // row violates row-level security policy" string.
+        const isRls =
+          /row-level security|violates.*policy|42501|with check/i.test(raw);
+        const msg = isRls
+          ? "Direct database writes are blocked. Moves must go through the secure server endpoint."
+          : raw;
         setPendingMove({ ...m, attempts: m.attempts + 1, error: msg });
         setConfirm({
           status: "error",
-          title: "Move failed to sync",
-          message: "Realtime sync didn't confirm your move.",
+          title: "Move rejected",
+          message: isRls
+            ? "Your client tried to write a move directly. Only the secure server endpoint can record moves."
+            : "Server didn't accept your move.",
           detail: msg,
           onRetry: () => void flushMove({ ...m, attempts: m.attempts + 1, error: null }),
         });

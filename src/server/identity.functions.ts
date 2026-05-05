@@ -1,30 +1,45 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
 const LinkSchema = z.object({
   walletAddress: z.string().min(4),
+  accessToken: z.string().min(10),
 });
 
 /**
- * Link the currently authenticated Google user (auth.uid()) to the
- * supplied wallet address by writing google_user_id + google_email onto
- * the matching `profiles` row. Creates the profile if it does not exist.
- *
- * Auth middleware guarantees this only runs for a real signed-in user;
- * the wallet address is whatever the client claims, but we only ever set
- * google_* on a profile keyed by that wallet, so a malicious caller can
- * at worst attach themselves to a wallet they don't own — they can NEVER
- * read another user's google_email (RLS still protects reads).
+ * Verify a Supabase access token (JWT issued to the signed-in Google user)
+ * by calling auth.getUser with that token. Returns { userId, email } on
+ * success, throws otherwise. We do NOT trust any caller-supplied identity
+ * fields — they're always re-derived from the verified token.
+ */
+async function verifyToken(accessToken: string) {
+  const SUPABASE_URL = process.env.SUPABASE_URL!;
+  const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY!;
+  const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+  });
+  const { data, error } = await client.auth.getUser(accessToken);
+  if (error || !data?.user) throw new Error("Invalid or expired Google session");
+  return { userId: data.user.id, email: data.user.email ?? null };
+}
+
+/**
+ * Link the currently authenticated Google user to the supplied wallet
+ * address. The Google identity is verified server-side via the access
+ * token; the wallet address is what the client claims. We only ever
+ * attach google_* to a profile keyed by that wallet — at worst a
+ * malicious caller can attach themselves to a wallet they don't own,
+ * but they can NEVER read another user's google_email (RLS still
+ * protects reads via column grants revoked from anon/authenticated).
  */
 export const linkGoogleToWallet = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((data) => LinkSchema.parse(data))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const { userId, email } = await verifyToken(data.accessToken);
     const wallet = data.walletAddress.toLowerCase();
-    const userId = context.userId;
-    const email = (context.claims as any)?.email ?? null;
 
     const { data: existing } = await supabaseAdmin
       .from("profiles")
@@ -54,9 +69,8 @@ export const linkGoogleToWallet = createServerFn({ method: "POST" })
   });
 
 /**
- * Returns the link status for a given wallet: whether a Google account
- * is currently linked, and if it matches the caller. Public read — no
- * sensitive fields are returned.
+ * Returns the link status for a given wallet. Public — no sensitive
+ * fields returned (only a boolean).
  */
 export const getWalletLinkStatus = createServerFn({ method: "GET" })
   .inputValidator((data) => z.object({ walletAddress: z.string().min(4) }).parse(data))

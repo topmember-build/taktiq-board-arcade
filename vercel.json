@@ -1,1 +1,1 @@
-{"buildCommand": "npm run build", "installCommand": "npm install --legacy-peer-deps", "outputDirectory": "dist/public"}
+{"buildCommand": "npm run build", "installCommand": "npm install --legacy-peer-deps", "outputDirectory": "dist/client"}
